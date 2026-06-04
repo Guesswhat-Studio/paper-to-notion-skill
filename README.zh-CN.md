@@ -6,6 +6,18 @@
 
 默认报告语言是英文。你也可以要求中文报告或中英双语报告。
 
+## 先连接 Notion
+
+这个 skill 通过 agent runtime 已授权的 Notion connector 写入 Notion。正常使用 Codex 或 Claude 时，不需要创建 Notion integration token，也不要把密钥粘贴到 prompt 里。
+
+安装或运行 skill 前：
+
+- **Codex**：先在 Codex 里连接 Notion app/connector，并授权它访问论文数据库所在的 workspace 或页面，然后回到当前 thread 运行下面的 setup prompt。
+- **Claude / Claude Code**：通过 Claude connector support 或已配置的 Notion MCP server 连接 Notion。在 Claude Code 里，请确认当前 session 能看到 Notion tools，再让 plugin 创建或更新数据库。
+- **还没有 connector**：skill 仍然可以生成本地报告、evidence pack 和 `notion_payload.json`，但应该在写入 Notion 前停止。只有在你明确选择 token fallback 时，才使用 REST fallback。
+
+setup 流程会先搜索已有的 `Paper Reading Library` 数据库。如果没找到，并且 connector 支持创建数据库，它会新建一个，并把数据库 ID 保存到 `.paper-notion/config.json`。
+
 ## 安装
 
 ### 方式 1：让 Agent 自动安装
