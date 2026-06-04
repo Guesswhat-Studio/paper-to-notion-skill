@@ -10,7 +10,7 @@
 
 ### 方式 1：让 Agent 自动安装
 
-如果你已经在用 Codex 或 Claude Code，最省事的方式是直接把安装任务交给 agent。它会安装 skill，并继续完成第一次工作流设置。
+如果你已经在用 Codex，最省事的方式是直接把安装任务交给 agent。它会安装 skill，并继续完成第一次工作流设置。
 
 #### Codex 用户
 
@@ -23,35 +23,36 @@ https://github.com/Guesswhat-Studio/paper-to-notion-skill
 请把它安装到我的 Codex skills 目录，然后使用 $paper-to-notion-skill 设置我的 Notion 论文阅读工作流。请自动完成后续设置：准备本地 Python 环境，创建或复用 Paper Reading Library 数据库，校验 schema，运行 Attention Is All You Need smoke test，保存 .paper-notion/config.json，最后只告诉我数据库或页面 URL、验证结果，以及还需要我手动处理的事项。
 ```
 
-#### Claude Code 用户
+### 方式 2：Claude Code Plugin 安装
 
-把下面这段话发给 Claude Code：
+Claude Code 的 plugin 命令由 Claude Code CLI 自己处理。模型在聊天里不能替你执行 `/plugin marketplace add` 或 `/plugin install`。请你先手动运行安装命令，再让安装好的 skill 继续做 setup。
 
-```text
-请帮我安装这个 Claude Code plugin：
-https://github.com/Guesswhat-Studio/paper-to-notion-skill
-
-请把它添加为 plugin marketplace，安装 paper-to-notion@guesswhat-paper-tools，然后使用 /paper-to-notion:paper-to-notion-skill 设置我的 Notion 论文阅读工作流。请自动完成后续设置：准备本地 Python 环境，创建或复用 Paper Reading Library 数据库，校验 schema，运行 Attention Is All You Need smoke test，保存 .paper-notion/config.json，最后只告诉我数据库或页面 URL、验证结果，以及还需要我手动处理的事项。
-```
-
-你也可以在 Claude Code 交互会话里直接运行：
+在 Claude Code 交互会话里输入：
 
 ```text
-/plugin marketplace add Guesswhat-Studio/paper-to-notion-skill
+/plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill
 /plugin install paper-to-notion@guesswhat-paper-tools
 /reload-plugins
 /paper-to-notion:paper-to-notion-skill set up my Notion paper reading workflow
 ```
 
+从终端运行：
+
+```bash
+claude plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill
+claude plugin install paper-to-notion@guesswhat-paper-tools
+claude -p "Use /paper-to-notion:paper-to-notion-skill to set up my Notion paper reading workflow. Keep the setup automatic: prepare the local Python environment, create or reuse the Paper Reading Library database, validate the schema, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and only report the final database/page URLs, validation status, and any action I must take."
+```
+
 如果你更喜欢一条终端命令：
 
 ```bash
-claude plugin marketplace add Guesswhat-Studio/paper-to-notion-skill && claude plugin install paper-to-notion@guesswhat-paper-tools && claude -p "Use /paper-to-notion:paper-to-notion-skill to set up my Notion paper reading workflow. Keep the setup automatic: prepare the local Python environment, create or reuse the Paper Reading Library database, validate the schema, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and only report the final database/page URLs, validation status, and any action I must take."
+claude plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill && claude plugin install paper-to-notion@guesswhat-paper-tools && claude -p "Use /paper-to-notion:paper-to-notion-skill to set up my Notion paper reading workflow. Keep the setup automatic: prepare the local Python environment, create or reuse the Paper Reading Library database, validate the schema, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and only report the final database/page URLs, validation status, and any action I must take."
 ```
 
 Claude 网页聊天不会直接加载 Claude Code plugin。请使用 Claude Code，或在支持插件的 Claude Cowork 里安装。
 
-### 方式 2：手动安装
+### 方式 3：手动安装
 
 #### Codex
 
@@ -84,7 +85,7 @@ Use $paper-to-notion-skill to set up my Notion paper reading workflow.
 把仓库添加为 Claude Code plugin marketplace，并安装插件：
 
 ```bash
-claude plugin marketplace add Guesswhat-Studio/paper-to-notion-skill
+claude plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill
 claude plugin install paper-to-notion@guesswhat-paper-tools
 ```
 

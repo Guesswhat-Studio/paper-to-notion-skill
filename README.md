@@ -10,7 +10,7 @@ The default report language is English. Chinese and bilingual reports are suppor
 
 ### Option 1: Agent-Assisted Install
 
-If you already use Codex or Claude Code, the easiest path is to ask the agent to install the skill and run the first setup pass for you.
+If you already use Codex, the easiest path is to ask the agent to install the skill and run the first setup pass for you.
 
 For Codex, paste this into a Codex session:
 
@@ -21,33 +21,36 @@ https://github.com/Guesswhat-Studio/paper-to-notion-skill
 Install it into my Codex skills directory, then use $paper-to-notion-skill to set up my Notion paper reading workflow. Please handle the setup automatically: prepare the local Python environment, create or reuse the Paper Reading Library database, validate the schema, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and only report the final database/page URLs, validation status, and any action I must take.
 ```
 
-For Claude Code, paste this into Claude Code:
+### Option 2: Claude Code Plugin Install
+
+Claude Code plugin commands are handled by the Claude Code CLI. The model cannot run `/plugin marketplace add` or `/plugin install` for you from inside a chat session. Run the install command yourself, then ask the installed skill to set up the workflow.
+
+In an interactive Claude Code session, type:
 
 ```text
-Please install this Claude Code plugin:
-https://github.com/Guesswhat-Studio/paper-to-notion-skill
-
-Add it as a plugin marketplace, install paper-to-notion@guesswhat-paper-tools, then use /paper-to-notion:paper-to-notion-skill to set up my Notion paper reading workflow. Please handle the setup automatically: prepare the local Python environment, create or reuse the Paper Reading Library database, validate the schema, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and only report the final database/page URLs, validation status, and any action I must take.
-```
-
-Claude Code users can also run the install inside an interactive Claude Code session:
-
-```text
-/plugin marketplace add Guesswhat-Studio/paper-to-notion-skill
+/plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill
 /plugin install paper-to-notion@guesswhat-paper-tools
 /reload-plugins
 /paper-to-notion:paper-to-notion-skill set up my Notion paper reading workflow
 ```
 
-If you prefer a single terminal command for Claude Code:
+From a terminal, use:
 
 ```bash
-claude plugin marketplace add Guesswhat-Studio/paper-to-notion-skill && claude plugin install paper-to-notion@guesswhat-paper-tools && claude -p "Use /paper-to-notion:paper-to-notion-skill to set up my Notion paper reading workflow. Keep the setup automatic: prepare the local Python environment, create or reuse the Paper Reading Library database, validate the schema, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and only report the final database/page URLs, validation status, and any action I must take."
+claude plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill
+claude plugin install paper-to-notion@guesswhat-paper-tools
+claude -p "Use /paper-to-notion:paper-to-notion-skill to set up my Notion paper reading workflow. Keep the setup automatic: prepare the local Python environment, create or reuse the Paper Reading Library database, validate the schema, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and only report the final database/page URLs, validation status, and any action I must take."
+```
+
+As a one-liner:
+
+```bash
+claude plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill && claude plugin install paper-to-notion@guesswhat-paper-tools && claude -p "Use /paper-to-notion:paper-to-notion-skill to set up my Notion paper reading workflow. Keep the setup automatic: prepare the local Python environment, create or reuse the Paper Reading Library database, validate the schema, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and only report the final database/page URLs, validation status, and any action I must take."
 ```
 
 Claude chat on the web does not load Claude Code plugins directly. Use Claude Code or Claude Cowork plugin support for this repository.
 
-### Option 2: Manual Install
+### Option 3: Manual Install
 
 #### Codex
 
@@ -80,7 +83,7 @@ Use $paper-to-notion-skill to set up my Notion paper reading workflow.
 Add the repository as a Claude Code plugin marketplace and install the plugin:
 
 ```bash
-claude plugin marketplace add Guesswhat-Studio/paper-to-notion-skill
+claude plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill
 claude plugin install paper-to-notion@guesswhat-paper-tools
 ```
 

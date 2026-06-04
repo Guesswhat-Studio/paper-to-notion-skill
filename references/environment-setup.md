@@ -33,6 +33,7 @@ If the host already has a reliable Python environment, it is acceptable to use t
 Support Windows, macOS, and Linux:
 
 - Windows: use PowerShell commands and `.venv/Scripts/python.exe`.
+- Windows/MSYS2 Python can create a Unix-style `.venv/bin/python`; `scripts/setup_environment.py` accepts both layouts.
 - macOS/Linux: use POSIX shell commands and `.venv/bin/python`.
 - The Python scripts use `pathlib` and avoid OS-specific path assumptions.
 - The bootstrap scripts create the venv in the same skill-local `.venv` location on every platform.
@@ -150,6 +151,8 @@ Never silently delete user pages. If deletion/trashing is needed, ask explicitly
 ## Common Failures
 
 - Missing `PyMuPDF`: install dependencies into the skill-local `.venv`.
+- PyMuPDF build fails on MSYS2/UCRT Python: use the bootstrap path to create a uv-managed CPython `.venv`, or use another Windows-native Python that can install PyMuPDF wheels.
+- `uv` was just installed with `winget` but appears missing: open a new terminal so PATH refreshes, or run the bootstrap path that can locate/use uv before calling Python checks.
 - Native OCR unavailable: proceed with text-layer PDFs and report that scanned PDFs need `tesseract`.
 - Network blocked: skip PDF download smoke test and validate only local scripts.
 - Notion plugin/connector unavailable: complete local setup and stop before database operations.

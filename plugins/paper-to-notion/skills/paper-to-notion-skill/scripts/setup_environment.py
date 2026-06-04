@@ -44,10 +44,30 @@ def skill_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
+def venv_python_candidates(venv_dir: Path) -> list[Path]:
+    preferred = [
+        venv_dir / "Scripts" / "python.exe",
+        venv_dir / "Scripts" / "python",
+        venv_dir / "bin" / "python.exe",
+        venv_dir / "bin" / "python",
+        venv_dir / "bin" / "python3",
+    ]
+    if not sys.platform.startswith("win"):
+        preferred = [
+            venv_dir / "bin" / "python",
+            venv_dir / "bin" / "python3",
+            venv_dir / "bin" / "python.exe",
+            venv_dir / "Scripts" / "python.exe",
+            venv_dir / "Scripts" / "python",
+        ]
+    return preferred
+
+
 def venv_python(venv_dir: Path) -> Path:
-    if sys.platform.startswith("win"):
-        return venv_dir / "Scripts" / "python.exe"
-    return venv_dir / "bin" / "python"
+    for candidate in venv_python_candidates(venv_dir):
+        if candidate.exists():
+            return candidate
+    return venv_python_candidates(venv_dir)[0]
 
 
 def run(command: list[str], cwd: Path | None = None) -> None:
@@ -59,7 +79,8 @@ def create_venv(venv_dir: Path) -> Path:
         venv.EnvBuilder(with_pip=True).create(venv_dir)
     python = venv_python(venv_dir)
     if not python.exists():
-        raise RuntimeError(f"Virtual environment Python not found: {python}")
+        searched = ", ".join(str(path) for path in venv_python_candidates(venv_dir))
+        raise RuntimeError(f"Virtual environment Python not found. Searched: {searched}")
     return python
 
 
@@ -75,7 +96,8 @@ def create_uv_venv(venv_dir: Path, python_version: str | None = None, install_py
     run(command)
     python = venv_python(venv_dir)
     if not python.exists():
-        raise RuntimeError(f"uv virtual environment Python not found: {python}")
+        searched = ", ".join(str(path) for path in venv_python_candidates(venv_dir))
+        raise RuntimeError(f"uv virtual environment Python not found. Searched: {searched}")
     return python
 
 

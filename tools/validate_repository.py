@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -86,6 +87,30 @@ def validate_mirrors(errors: list[str]) -> None:
             assert_same(path, PLUGIN_SKILL / "scripts" / path.name, errors)
 
 
+def validate_venv_python_resolution(errors: list[str]) -> None:
+    try:
+        import importlib.util
+
+        script_path = ROOT / "scripts" / "setup_environment.py"
+        spec = importlib.util.spec_from_file_location("setup_environment", script_path)
+        if spec is None or spec.loader is None:
+            errors.append("Could not load scripts/setup_environment.py for venv layout validation")
+            return
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as tmp:
+            venv_dir = Path(tmp) / "venv"
+            (venv_dir / "bin").mkdir(parents=True)
+            expected = venv_dir / "bin" / "python"
+            expected.write_text("", encoding="utf-8")
+            actual = module.venv_python(venv_dir)
+            if actual != expected:
+                errors.append(f"venv_python should accept Unix-style bin/python layout, got {actual}")
+    except Exception as exc:  # noqa: BLE001 - report validation failure with context.
+        errors.append(f"venv layout validation failed: {exc}")
+
+
 def main() -> int:
     errors: list[str] = []
     for path in [
@@ -101,6 +126,7 @@ def main() -> int:
 
     validate_manifests(errors)
     validate_mirrors(errors)
+    validate_venv_python_resolution(errors)
 
     if errors:
         for error in errors:
