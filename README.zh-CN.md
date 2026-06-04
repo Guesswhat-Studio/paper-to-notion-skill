@@ -173,6 +173,7 @@ Claude Cowork 用户可以在 `Customize -> Plugins` 里添加同一个 GitHub �
 - arXiv HTML 里的 figure 图片 URL 只有在生成后的 URL 通过可访问性检查时，才作为 Notion hosted image 外链使用。
 - 抽取并解释关键证据：公式、图、表、算法、定理、模型结构图、实验结果、消融、鲁棒性分析等。
 - 生成 Notion-ready 报告，保留 LaTeX 公式、Markdown 表格、代码和复现检查记录。
+- 发布前校验报告深度和模板完整性，避免 payload schema 合法但页面正文过浅。
 - 使用 DOI、arXiv ID 或规范化原始标题去重，创建或更新 Notion 数据库页面。
 - 数据库只保留索引字段，长分析放进页面正文。
 - 附带本地脚本：环境检查、schema 校验、payload 构建、payload 验证、Notion REST fallback 和 smoke test。
@@ -190,7 +191,7 @@ paper-to-notion-skill/
   config/notion_schema.yaml        # 默认 Notion 数据库 schema
   plugins/paper-to-notion/         # Claude Code plugin package（包含 mirrored skill copy）
   references/                      # 阅读、发布、连接器、环境设置参考
-  scripts/                         # 环境、payload、校验、发布辅助脚本
+  scripts/                         # 环境、报告质量、payload、校验、发布辅助脚本
   tools/                           # 仓库验证和 plugin 同步工具
 ```
 
@@ -240,6 +241,13 @@ claude plugin install paper-to-notion@guesswhat-paper-tools
 
 ```bash
 python tools/sync_plugin.py
+```
+
+发布报告前建议先跑报告质量和 payload 两层校验：
+
+```bash
+python scripts/validate_report_quality.py paper-output/report.md --payload paper-output/notion_payload.json
+python scripts/validate_notion_payload.py paper-output/notion_payload.json --check-image-urls
 ```
 
 提交前建议跑这两个检查：

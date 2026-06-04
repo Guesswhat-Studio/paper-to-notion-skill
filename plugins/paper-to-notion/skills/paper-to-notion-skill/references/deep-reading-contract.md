@@ -223,6 +223,15 @@ Optional image-status note when local images cannot be embedded.
 
 For Chinese reports, translate section headings naturally. For bilingual reports, keep the English full report and add a compact Chinese overview near the top unless the user asks otherwise.
 
+## Batch Mode Guardrails
+
+For a multi-paper batch:
+
+1. Generate and validate one representative report first, then compare it against a known good prior report or the structure in this contract before continuing the batch.
+2. Use `scripts/validate_report_quality.py` for every report. Do not publish the batch if any report fails the quality gate.
+3. Track each paper's image status as `hosted`, `local_only`, `placeholder`, or `no_images`. If arXiv HTML extraction reports reachable hosted figures, the report must embed at least one hosted figure unless there is a documented reason not to.
+4. Keep a small batch index with paper ID/title, report path, word count, image status, and validation result so failures are visible before Notion publishing.
+
 ## Section Expectations
 
 - Do not include a dedicated metadata section in the page body by default. Store metadata in the database row. Mention metadata in prose only when it affects interpretation.
@@ -242,6 +251,7 @@ For Chinese reports, translate section headings naturally. For bilingual reports
 Before publishing:
 
 - Metadata is verified against official sources or the PDF.
+- The local report passes `scripts/validate_report_quality.py`. Use `--payload notion_payload.json` when a payload already exists, and use `--arxiv-html-extract arxiv_html_extract.json` when an arXiv HTML reading pack exists.
 - The source registry distinguishes used sources from checked-but-not-found sources.
 - Local evidence images are extracted when useful; if they cannot be embedded in Notion, or hosted arXiv images fail reachability checks, the page states the image limitation and points to the local evidence pack.
 - Important formulas are in LaTeX.
@@ -252,3 +262,10 @@ Before publishing:
 - Code availability is checked or the failure to check is disclosed.
 - Report language matches the user's request.
 - Notion image status is honest: hosted, local-only, placeholder, or no images. Hosted image URLs are checked before publishing.
+
+Example validation commands:
+
+```bash
+python scripts/validate_report_quality.py paper-output/report.md --payload paper-output/notion_payload.json
+python scripts/validate_report_quality.py paper-output/report.md --payload paper-output/notion_payload.json --arxiv-html-extract paper-output/arxiv_html_extract.json --check-image-urls
+```

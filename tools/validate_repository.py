@@ -123,13 +123,22 @@ def validate_arxiv_asset_resolution(errors: list[str]) -> None:
         module = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = module
         spec.loader.exec_module(module)
-        resolved = module.resolve_asset_url(
-            "https://arxiv.org/html/2503.14232",
-            "extracted/6458440/images/fig1-min.png",
-        )
-        expected = "https://arxiv.org/html/2503.14232/extracted/6458440/images/fig1-min.png"
-        if resolved != expected:
-            errors.append(f"arXiv asset URL resolution regressed: expected {expected}, got {resolved}")
+        cases = [
+            (
+                "https://arxiv.org/html/2503.14232",
+                "extracted/6458440/images/fig1-min.png",
+                "https://arxiv.org/html/2503.14232/extracted/6458440/images/fig1-min.png",
+            ),
+            (
+                "https://arxiv.org/html/2605.29582",
+                "2605.29582v1/x1.png",
+                "https://arxiv.org/html/2605.29582v1/x1.png",
+            ),
+        ]
+        for base_url, src, expected in cases:
+            resolved = module.resolve_asset_url(base_url, src)
+            if resolved != expected:
+                errors.append(f"arXiv asset URL resolution regressed: expected {expected}, got {resolved}")
     except Exception as exc:  # noqa: BLE001 - report validation failure with context.
         errors.append(f"arXiv asset URL validation failed: {exc}")
 
