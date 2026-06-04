@@ -1,5 +1,7 @@
 # Paper To Notion Skill
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 Evidence-driven paper reading for Codex, Claude, WorkBuddy, and compatible MCP/CLI agent runtimes. This skill turns an academic paper into a durable Notion record: a lean database row for indexing, plus a rich report page with grounded evidence, formulas, figures, tables, code checks, limitations, and reproducibility notes.
 
 The default report language is English. Chinese and bilingual reports are supported when requested.
