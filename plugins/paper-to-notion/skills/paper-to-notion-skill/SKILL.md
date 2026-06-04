@@ -38,8 +38,9 @@ For arXiv HTML figures, official `https://arxiv.org/html/...` image URLs may be 
 2. Prepare and verify the local paper-reading environment.
    - Read `references/environment-setup.md`.
    - Check Python, required Python packages, optional OCR/tools, and network access.
-   - Prefer a uv-managed `.venv` inside the skill directory; use `python scripts/setup_environment.py --use-uv --install` when Python is available.
-   - If Python is missing, use the bootstrap script for the user's OS only after the user approves uv/Python installation.
+   - Prefer a uv-managed `.venv` inside the skill directory.
+   - If Python is already available, use `python scripts/setup_environment.py --use-uv --install`.
+   - If Python is missing, do not try to run Python scripts. Use the OS bootstrap script after the user approves uv/Python installation: `.\scripts\bootstrap_uv.ps1 -InstallUv` on Windows, or `INSTALL_UV=1 sh scripts/bootstrap_uv.sh` on macOS/Linux.
    - Run `python scripts/smoke_test_attention.py` after dependency setup when network access is available.
 3. Create or reuse the Notion database.
    - Use `config/notion_schema.yaml` as the machine-readable schema source.

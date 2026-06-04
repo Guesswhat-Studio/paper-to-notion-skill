@@ -143,7 +143,7 @@ paper-to-notion-skill/
 
 ## 环境要求
 
-- Python 3.10 或更新版本。
+- Python 3.10 或更新版本；如果本机还没有 Python，需要能运行 shell bootstrap 脚本来安装 uv-managed Python。
 - Codex、Claude、WorkBuddy，或兼容 MCP/CLI 的 agent runtime。
 - 通过 runtime connector 获得 Notion 读写权限；只有在使用 REST fallback 时才需要 Notion integration token。
 - 可选：`uv`，用于更快地创建本地环境。
@@ -239,10 +239,24 @@ Please build or validate notion_payload.json, deduplicate by DOI/arXiv/title, cr
 
 这些命令主要给维护者、调试或离线环境使用。普通用户可以让 Codex 或 Claude 自动处理。
 
-创建 skill-local 虚拟环境并安装依赖：
+如果本机已经有 Python，创建 skill-local 虚拟环境并安装依赖：
 
 ```bash
 python scripts/setup_environment.py --use-uv --install --json-report .paper-notion/environment-check.json
+```
+
+如果本机还没有 Python，先走对应系统的 bootstrap 脚本。它们不需要预先有 Python：脚本会先安装或使用独立的 `uv` binary，再由 uv 安装 Python、创建 `.venv`、安装依赖。
+
+Windows PowerShell：
+
+```powershell
+.\scripts\bootstrap_uv.ps1 -InstallUv
+```
+
+macOS/Linux：
+
+```bash
+INSTALL_UV=1 sh scripts/bootstrap_uv.sh
 ```
 
 只检查当前环境：

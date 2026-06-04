@@ -128,7 +128,7 @@ paper-to-notion-skill/
 
 ## Requirements
 
-- Python 3.10 or newer.
+- Python 3.10 or newer, or shell access to run the bootstrap scripts that install a uv-managed Python.
 - A compatible agent runtime, such as Codex, Claude, WorkBuddy, or another MCP/CLI runtime.
 - Notion read/write access through the runtime connector, or a Notion integration token only when using the optional REST fallback.
 - Optional: `uv` for faster environment setup.
@@ -195,10 +195,24 @@ After installation, Codex or Claude should perform the remaining setup from the 
 
 ## Manual Environment Commands
 
-From the skill directory, create a skill-local virtual environment and install dependencies:
+If Python is already available, create a skill-local virtual environment and install dependencies:
 
 ```bash
 python scripts/setup_environment.py --use-uv --install --json-report .paper-notion/environment-check.json
+```
+
+If Python is not available yet, use the bootstrap script for your OS. These commands install or use the standalone `uv` binary first, then let uv install Python and create `.venv`.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\bootstrap_uv.ps1 -InstallUv
+```
+
+macOS/Linux:
+
+```bash
+INSTALL_UV=1 sh scripts/bootstrap_uv.sh
 ```
 
 If you already have a Python environment and only want to check it:

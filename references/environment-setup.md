@@ -14,7 +14,7 @@ paper-to-notion-skill/
     smoke-test/
 ```
 
-From the skill directory, create or check it with:
+If Python is already available, create or check it with:
 
 ```bash
 python scripts/setup_environment.py --use-uv --install --json-report .paper-notion/environment-check.json
@@ -39,7 +39,7 @@ Support Windows, macOS, and Linux:
 
 ## No Python Available
 
-If Python is missing but shell access and network access are available, bootstrap with uv.
+If Python is missing, do not run `python scripts/setup_environment.py`; that command naturally requires Python. Instead, use the shell bootstrap scripts. They do not require Python up front: they find or install the standalone `uv` binary, use `uv python install` to install a uv-managed Python, create `.venv`, install `requirements.txt`, and then run the Python environment check.
 
 Windows PowerShell:
 
