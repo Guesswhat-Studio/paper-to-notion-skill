@@ -33,6 +33,9 @@ jobs:
       - name: Compile Python scripts
         run: python -m compileall scripts tools
 
+      - name: Check plugin copy is in sync
+        run: python tools/sync_plugin.py --check
+
       - name: Validate repository packaging
         run: python tools/validate_repository.py
 

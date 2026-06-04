@@ -4,12 +4,12 @@ Use this reference during setup and troubleshooting. The goal is to make local P
 
 ## Managed Environment
 
-Prefer a skill-local uv-managed virtual environment:
+Prefer a uv-managed virtual environment in the active workspace (the current working directory), under `.paper-notion/`. Keep it out of the skill/plugin directory so it survives plugin-cache refreshes and stays user-owned:
 
 ```text
-paper-to-notion-skill/
-  .venv/
+<workspace>/
   .paper-notion/
+    .venv/
     environment-check.json
     smoke-test/
 ```
@@ -26,17 +26,17 @@ Check without installing:
 python scripts/setup_environment.py --check-only
 ```
 
-If the host already has a reliable Python environment, it is acceptable to use that environment for bootstrapping, but the durable runtime should be the skill-local `.venv`.
+If the host already has a reliable Python environment, it is acceptable to use that environment for bootstrapping, but the durable runtime should be the workspace `.paper-notion/.venv`.
 
 ## Platform Support
 
 Support Windows, macOS, and Linux:
 
-- Windows: use PowerShell commands and `.venv/Scripts/python.exe`.
-- Windows/MSYS2 Python can create a Unix-style `.venv/bin/python`; `scripts/setup_environment.py` accepts both layouts.
-- macOS/Linux: use POSIX shell commands and `.venv/bin/python`.
+- Windows: use PowerShell commands and `.paper-notion/.venv/Scripts/python.exe`.
+- Windows/MSYS2 Python can create a Unix-style `.paper-notion/.venv/bin/python`; `scripts/setup_environment.py` accepts both layouts.
+- macOS/Linux: use POSIX shell commands and `.paper-notion/.venv/bin/python`.
 - The Python scripts use `pathlib` and avoid OS-specific path assumptions.
-- The bootstrap scripts create the venv in the same skill-local `.venv` location on every platform.
+- The bootstrap scripts create the venv in the same workspace `.paper-notion/.venv` location on every platform.
 
 ## No Python Available
 
@@ -54,7 +54,7 @@ macOS/Linux:
 INSTALL_UV=1 sh scripts/bootstrap_uv.sh
 ```
 
-The bootstrap scripts use the official Astral uv installer only when the user explicitly allows uv installation. Then `uv python install` installs a uv-managed Python and creates `.venv` inside the skill directory.
+The bootstrap scripts use the official Astral uv installer only when the user explicitly allows uv installation. Then `uv python install` installs a uv-managed Python and creates `.venv` in the workspace `.paper-notion/` directory.
 
 Do not silently install system software. If `uv` and Python are both missing, explain the bootstrap command and ask the user to approve running it.
 
@@ -104,16 +104,16 @@ After setup, run:
 python scripts/smoke_test_attention.py --output .paper-notion/smoke-test
 ```
 
-When using the skill-local venv on Windows:
+When using the workspace venv on Windows:
 
 ```bash
-.venv/Scripts/python.exe scripts/smoke_test_attention.py --output .paper-notion/smoke-test
+.paper-notion/.venv/Scripts/python.exe scripts/smoke_test_attention.py --output .paper-notion/smoke-test
 ```
 
-When using the skill-local venv on macOS/Linux:
+When using the workspace venv on macOS/Linux:
 
 ```bash
-.venv/bin/python scripts/smoke_test_attention.py --output .paper-notion/smoke-test
+.paper-notion/.venv/bin/python scripts/smoke_test_attention.py --output .paper-notion/smoke-test
 ```
 
 The smoke test uses:
@@ -150,7 +150,7 @@ Never silently delete user pages. If deletion/trashing is needed, ask explicitly
 
 ## Common Failures
 
-- Missing `PyMuPDF`: install dependencies into the skill-local `.venv`.
+- Missing `PyMuPDF`: install dependencies into the workspace `.paper-notion/.venv`.
 - PyMuPDF build fails on MSYS2/UCRT Python: use the bootstrap path to create a uv-managed CPython `.venv`, or use another Windows-native Python that can install PyMuPDF wheels.
 - `uv` was just installed with `winget` but appears missing: open a new terminal so PATH refreshes, or run the bootstrap path that can locate/use uv before calling Python checks.
 - Native OCR unavailable: proceed with text-layer PDFs and report that scanned PDFs need `tesseract`.

@@ -9,6 +9,15 @@ description: Evidence-driven paper reading and Notion publishing workflow. Use w
 
 Use this skill to turn papers into durable Notion records: a lean database row for indexing, plus a rich Notion page report that carries the actual reading work. Default to English reports unless the user requests Chinese or bilingual output.
 
+## Paths And Running Scripts
+
+All `scripts/...` and `references/...` paths in this skill are relative to the **skill root** (the directory that contains this `SKILL.md`). Resolve that root for the current runtime before running any command:
+
+- **Claude (plugin install)**: the skill is loaded from the plugin cache, and shell commands run from the user's project directory, not the skill directory. Use the skill base directory provided when the skill is loaded as the prefix, e.g. `python "<skill-root>/scripts/setup_environment.py" ...`. Do not assume `scripts/...` resolves from the current directory.
+- **Codex / generic skill install**: run commands from the skill directory so the relative `scripts/...` form works as written.
+
+Durable, user-owned state (the virtual environment, environment reports, config) is written to the **active workspace** (the current working directory) under `.paper-notion/`, never into the skill/plugin directory, so it survives plugin-cache refreshes and stays editable by the user.
+
 ## Workflow Decision
 
 - **Setup request**: If the user asks to connect Notion, initialize a paper database, inspect or customize the schema, prepare the workflow, install dependencies, validate the environment, or run a sample-paper test, follow `references/runtime-connectors.md`, `references/environment-setup.md`, `references/notion-database-schema.md`, `references/schema-customization.md`, and the setup prompt in `references/prompt-pack.md`.
@@ -38,7 +47,7 @@ For arXiv HTML figures, official `https://arxiv.org/html/...` image URLs may be 
 2. Prepare and verify the local paper-reading environment.
    - Read `references/environment-setup.md`.
    - Check Python, required Python packages, optional OCR/tools, and network access.
-   - Prefer a uv-managed `.venv` inside the skill directory.
+   - Prefer a uv-managed virtual environment in the active workspace at `.paper-notion/.venv`.
    - If Python is already available, use `python scripts/setup_environment.py --use-uv --install`.
    - If Python is missing, do not try to run Python scripts. Use the OS bootstrap script after the user approves uv/Python installation: `.\scripts\bootstrap_uv.ps1 -InstallUv` on Windows, or `INSTALL_UV=1 sh scripts/bootstrap_uv.sh` on macOS/Linux.
    - Run `python scripts/smoke_test_attention.py` after dependency setup when network access is available.
@@ -117,7 +126,7 @@ Do not add long analytical fields such as contribution, technical core, limitati
 
 ## Useful Scripts
 
-- `scripts/setup_environment.py`: Check Python/PDF dependencies and optionally create the skill-local `.venv`.
+- `scripts/setup_environment.py`: Check Python/PDF dependencies and optionally create the workspace `.paper-notion/.venv`.
 - `scripts/fetch_arxiv_html.py`: Fetch official arXiv HTML renderings and extract title, authors, abstract, sections, verified figures, tables, and equation counts into a reading pack.
 - `scripts/smoke_test_attention.py`: Download and parse the Attention Is All You Need paper, then generate a local test report and payload.
 - `scripts/schema_tool.py`: Validate `config/notion_schema.yaml` and render Notion DDL/add-column statements.

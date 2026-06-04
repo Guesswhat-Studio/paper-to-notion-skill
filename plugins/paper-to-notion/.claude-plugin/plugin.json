@@ -1,7 +1,6 @@
 {
   "name": "paper-to-notion",
-  "displayName": "Paper To Notion",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read academic papers with source-grounded evidence and publish rich reports to a lean Notion paper database.",
   "author": {
     "name": "Guesswhat Studio",

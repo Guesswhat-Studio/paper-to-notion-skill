@@ -218,7 +218,7 @@ paper-to-notion-skill/
 - 检测当前 runtime 和可用的 Notion connector。
 - 创建或复用 `Paper Reading Library`。
 - 校验 `config/notion_schema.yaml`。
-- 准备 skill-local Python 环境。
+- 在工作目录准备 Python 环境（`.paper-notion/.venv`）。
 - 网络可用时运行 `Attention Is All You Need` smoke test。
 - 在工作区保存 `.paper-notion/config.json`。
 - 验证 Notion 数据库可以 fetch 和 query。
@@ -301,7 +301,7 @@ Please build or validate notion_payload.json, deduplicate by DOI/arXiv/title, cr
 
 这些命令主要给维护者、调试或离线环境使用。普通用户可以让 Codex 或 Claude 自动处理。
 
-如果本机已经有 Python，创建 skill-local 虚拟环境并安装依赖：
+如果本机已经有 Python，在工作目录创建虚拟环境（`.paper-notion/.venv`）并安装依赖：
 
 ```bash
 python scripts/setup_environment.py --use-uv --install --json-report .paper-notion/environment-check.json

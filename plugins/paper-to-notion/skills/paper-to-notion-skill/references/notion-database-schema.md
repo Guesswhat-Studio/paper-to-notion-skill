@@ -95,9 +95,9 @@ CREATE TABLE (
   "default_report_language": "English",
   "default_database_title": "Paper Reading Library",
   "environment_manager": "uv",
-  "venv": "<skill-root>/.venv",
-  "python_windows": "<skill-root>/.venv/Scripts/python.exe",
-  "python_posix": "<skill-root>/.venv/bin/python",
+  "venv": ".paper-notion/.venv",
+  "python_windows": ".paper-notion/.venv/Scripts/python.exe",
+  "python_posix": ".paper-notion/.venv/bin/python",
   "last_environment_check": ".paper-notion/environment-check.json",
   "last_smoke_test": ".paper-notion/smoke-test/notion_payload.json"
 }

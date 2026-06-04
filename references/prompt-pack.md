@@ -7,7 +7,7 @@ These prompts are examples for users or future agents. The skill itself should f
 ```text
 Use $paper-to-notion-skill to set up my Notion paper reading workflow.
 
-Please detect whether this environment is Codex, Claude, WorkBuddy, or another compatible MCP/CLI runtime; check whether the OS is Windows, macOS, or Linux; check whether Notion read/write access is available through the runtime connector; create or reuse a Notion database named Paper Reading Library; ensure it has the required paper index fields; create useful views; prepare a skill-local uv-managed .venv for PDF reading; if Python is missing, explain and request approval before bootstrapping uv and uv-managed Python; run the Attention Is All You Need smoke test; save .paper-notion/config.json in this workspace; and verify that the database can be fetched and queried.
+Please detect whether this environment is Codex, Claude, WorkBuddy, or another compatible MCP/CLI runtime; check whether the OS is Windows, macOS, or Linux; check whether Notion read/write access is available through the runtime connector; create or reuse a Notion database named Paper Reading Library; ensure it has the required paper index fields; create useful views; prepare a workspace uv-managed .venv at .paper-notion/.venv for PDF reading; if Python is missing, explain and request approval before bootstrapping uv and uv-managed Python; run the Attention Is All You Need smoke test; save .paper-notion/config.json in this workspace; and verify that the database can be fetched and queried.
 ```
 
 ## Environment-Only Prompt
@@ -15,7 +15,7 @@ Please detect whether this environment is Codex, Claude, WorkBuddy, or another c
 ```text
 Use $paper-to-notion-skill to check and prepare my local paper-reading environment.
 
-Please detect Windows/macOS/Linux, create the skill-local .venv with uv if useful, install the required Python packages, validate PyMuPDF/Pillow/requests/HTML parsing support, report optional tool availability, and run the Attention Is All You Need smoke test if network access is available.
+Please detect Windows/macOS/Linux, create the workspace .venv at .paper-notion/.venv with uv if useful, install the required Python packages, validate PyMuPDF/Pillow/requests/HTML parsing support, report optional tool availability, and run the Attention Is All You Need smoke test if network access is available.
 ```
 
 ## Default English Reading Prompt

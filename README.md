@@ -252,14 +252,14 @@ After installation, Codex or Claude should perform the remaining setup from the 
 - Detect the runtime and available Notion connector.
 - Create or reuse `Paper Reading Library`.
 - Validate the default schema in `config/notion_schema.yaml`.
-- Prepare a skill-local Python environment.
+- Prepare a workspace Python environment at `.paper-notion/.venv`.
 - Run the `Attention Is All You Need` smoke test when network access is available.
 - Save workspace state in `.paper-notion/config.json`.
 - Verify that the Notion database can be fetched and queried.
 
 ## Manual Environment Commands
 
-If Python is already available, create a skill-local virtual environment and install dependencies:
+If Python is already available, create a workspace virtual environment (`.paper-notion/.venv`) and install dependencies:
 
 ```bash
 python scripts/setup_environment.py --use-uv --install --json-report .paper-notion/environment-check.json

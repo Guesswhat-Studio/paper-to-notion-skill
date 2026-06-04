@@ -5,7 +5,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 $SkillRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-$VenvPath = Join-Path $SkillRoot ".venv"
+# Keep durable state in the active workspace so it survives plugin-cache refreshes.
+$Workspace = (Get-Location).Path
+$VenvPath = Join-Path $Workspace ".paper-notion\.venv"
+New-Item -ItemType Directory -Force -Path (Join-Path $Workspace ".paper-notion") | Out-Null
 
 function Refresh-UvCommand {
     $cmd = Get-Command uv -ErrorAction SilentlyContinue
@@ -41,6 +44,6 @@ if (-not $uv) {
 & $uv venv $VenvPath --python $PythonVersion
 $python = Join-Path $VenvPath "Scripts\python.exe"
 & $uv pip install --python $python -r (Join-Path $SkillRoot "requirements.txt")
-& $python (Join-Path $SkillRoot "scripts\setup_environment.py") --check-only --json-report (Join-Path $SkillRoot ".paper-notion\environment-check.json")
+& $python (Join-Path $SkillRoot "scripts\setup_environment.py") --check-only --json-report (Join-Path $Workspace ".paper-notion\environment-check.json")
 
 Write-Host "paper-to-notion-skill environment is ready: $VenvPath"

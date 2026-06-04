@@ -44,6 +44,16 @@ def skill_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
+def workspace_venv() -> Path:
+    """Default virtual environment location inside the active workspace.
+
+    Placed under the current working directory (the user's project) rather than
+    the skill directory so it survives plugin-cache refreshes on Claude and stays
+    user-owned across every runtime.
+    """
+    return Path.cwd() / ".paper-notion" / ".venv"
+
+
 def venv_python_candidates(venv_dir: Path) -> list[Path]:
     preferred = [
         venv_dir / "Scripts" / "python.exe",
@@ -198,7 +208,7 @@ def write_report(path: Path, checks: list[Check], python: Path | None) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--venv", type=Path, help="Virtual environment directory to create or check; defaults to <skill-root>/.venv when installing")
+    parser.add_argument("--venv", type=Path, help="Virtual environment directory to create or check; defaults to .paper-notion/.venv in the current workspace when installing")
     parser.add_argument("--install", action="store_true", help="Install requirements into --venv")
     parser.add_argument("--use-uv", action="store_true", help="Use uv for venv creation and dependency installation")
     parser.add_argument("--install-python", action="store_true", help="With --use-uv, install a uv-managed Python first")
@@ -209,7 +219,7 @@ def main() -> int:
 
     python: Path | None = None
     if args.venv is None and (args.install or args.use_uv or args.install_python):
-        args.venv = skill_root() / ".venv"
+        args.venv = workspace_venv()
 
     if args.check_only and args.venv is None:
         python = None
@@ -238,7 +248,7 @@ def main() -> int:
         print("\nRequired environment checks failed.")
         if not args.venv:
             print("Try: python scripts/setup_environment.py --use-uv --install")
-            print("Fallback without uv: python scripts/setup_environment.py --venv .venv --install")
+            print("Fallback without uv: python scripts/setup_environment.py --venv .paper-notion/.venv --install")
         return 1
 
     print("\nEnvironment checks passed.")
