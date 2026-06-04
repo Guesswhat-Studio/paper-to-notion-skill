@@ -103,6 +103,7 @@ For private repository installs, the user must already have GitHub access to `Gu
 - Reads papers from a local PDF, arXiv URL, DOI, paper URL, or title.
 - Resolves paper identity and verifies metadata from the paper or official sources.
 - Builds a source registry and reading pack before writing the report.
+- Uses official arXiv HTML renderings when available at `https://arxiv.org/html/<arxiv_id>`.
 - Extracts evidence from formulas, figures, tables, algorithms, theorems, model diagrams, ablations, robustness panels, and result sections when available.
 - Generates Notion-ready reports with source-grounded claims and explicit uncertainty markers.
 - Creates or updates a Notion database page using DOI, arXiv ID, or normalized original title for deduplication.
@@ -114,6 +115,7 @@ For private repository installs, the user must already have GitHub access to `Gu
 ```text
 paper-to-notion-skill/
   .claude-plugin/marketplace.json  # Claude Code marketplace catalog
+  LICENSE                          # MIT license
   SKILL.md                         # Main skill instructions
   requirements.txt                 # Python dependencies
   agents/openai.yaml               # Agent configuration example
@@ -199,6 +201,12 @@ Validate the default Notion schema:
 python scripts/schema_tool.py --command validate
 ```
 
+Fetch a structured reading pack from arXiv HTML:
+
+```bash
+python scripts/fetch_arxiv_html.py 1706.03762 --output .paper-notion/arxiv-html-test --limit 5
+```
+
 Run the local smoke test:
 
 ```bash
@@ -254,6 +262,16 @@ If your Notion connector does not support `STATUS` or `PEOPLE` fields, render fa
 ```bash
 python scripts/schema_tool.py --command ddl --use-fallbacks
 ```
+
+## Image Hosting
+
+For Notion image blocks, the safest default is to let the Notion connector upload images when it supports file uploads. When the connector cannot upload local files, these free or free-tier options work well:
+
+- **GitHub public repo + [jsDelivr](https://github.com/jsdelivr/jsdelivr)**: Good for public research notes and static evidence images. Commit images to a public repo and use URLs like `https://cdn.jsdelivr.net/gh/<owner>/<repo>@<commit>/<path>`. jsDelivr is free for open-source files and supports GitHub-backed CDN delivery.
+- **[Cloudinary free plan](https://cloudinary.com/documentation/billing_and_plans)**: Good when you want API uploads, an asset dashboard, transformations, and CDN delivery. Cloudinary's free plan currently includes monthly credits for transformations, storage, and bandwidth.
+- **Local evidence pack**: Best when images are private, copyrighted, or not ready to publish. Use `scripts/build_evidence_pack.py` and link the generated local HTML pack from the Notion page.
+
+Avoid publishing paper figures to a public image host when the paper license or your workspace policy does not allow redistribution.
 
 ## Typical Agent Usage
 
@@ -366,7 +384,7 @@ This folder is ignored by Git because it can contain local runtime state.
 
 - Batch import from text files, CSV, Zotero exports, or Notion backlogs.
 - Optional GitHub/jsDelivr image hosting helper for Notion-safe image URLs.
-- arXiv source asset extraction for higher-quality figures and tables.
+- Deeper arXiv source asset extraction for higher-quality figures and tables beyond the official HTML rendering.
 - Semantic Scholar or OpenAlex citation enrichment.
 - Optional daily discovery mode with arXiv categories, scoring, and conference tracking.
 - Team-reading workflows with assignment, priority, review status, and weekly digests.
@@ -374,4 +392,4 @@ This folder is ignored by Git because it can contain local runtime state.
 
 ## License
 
-No license has been selected yet. Add a license before publishing this repository for broad external reuse.
+MIT License. See [LICENSE](LICENSE).

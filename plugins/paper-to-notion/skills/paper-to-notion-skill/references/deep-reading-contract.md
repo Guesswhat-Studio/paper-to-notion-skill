@@ -43,7 +43,8 @@ If the input is ambiguous, resolve the paper identity before writing. Prefer off
    - Verify title, authors, and affiliations against page 1.
 3. For arXiv papers:
    - Prefer the abstract page for metadata.
-   - Prefer source assets for figures when they are easy to obtain and higher quality than PDF crops.
+   - Prefer the official arXiv HTML rendering at `https://arxiv.org/html/<arxiv_id>` when available. Run `scripts/fetch_arxiv_html.py` to create a structured reading pack with title, authors, abstract, sections, figures, tables, and equation counts.
+   - Prefer HTML-linked figures/tables or source assets when they are easy to obtain and higher quality than PDF crops.
    - Use PDF crops when source assets are unavailable or unsuitable.
 4. For titles or DOI:
    - Resolve to an official page before reading when network tools are available.

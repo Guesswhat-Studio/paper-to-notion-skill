@@ -9,6 +9,7 @@
   },
   "homepage": "https://github.com/Guesswhat-Studio/paper-to-notion-skill",
   "repository": "https://github.com/Guesswhat-Studio/paper-to-notion-skill",
+  "license": "MIT",
   "keywords": [
     "papers",
     "notion",

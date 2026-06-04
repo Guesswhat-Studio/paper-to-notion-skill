@@ -107,6 +107,7 @@ Claude Cowork 用户可以在 `Customize -> Plugins` 里添加同一个 GitHub �
 - 从本地 PDF、arXiv URL、DOI、论文 URL 或论文标题开始阅读。
 - 从论文原文或官方来源核对标题、作者、日期、venue、DOI、arXiv、代码仓库等元数据。
 - 写报告前先建立 source registry 和 reading pack，减少无来源推断。
+- arXiv 论文优先使用官方 HTML 渲染：`https://arxiv.org/html/<arxiv_id>`。
 - 抽取并解释关键证据：公式、图、表、算法、定理、模型结构图、实验结果、消融、鲁棒性分析等。
 - 生成 Notion-ready 报告，保留 LaTeX 公式、Markdown 表格、代码和复现检查记录。
 - 使用 DOI、arXiv ID 或规范化原始标题去重，创建或更新 Notion 数据库页面。
@@ -118,6 +119,7 @@ Claude Cowork 用户可以在 `Customize -> Plugins` 里添加同一个 GitHub �
 ```text
 paper-to-notion-skill/
   .claude-plugin/marketplace.json  # Claude Code marketplace catalog
+  LICENSE                          # MIT license
   SKILL.md                         # 主 skill 指令
   requirements.txt                 # Python 依赖
   agents/openai.yaml               # agent 配置示例
@@ -236,6 +238,12 @@ python scripts/setup_environment.py --check-only
 python scripts/schema_tool.py --command validate
 ```
 
+从 arXiv HTML 生成结构化 reading pack：
+
+```bash
+python scripts/fetch_arxiv_html.py 1706.03762 --output .paper-notion/arxiv-html-test --limit 5
+```
+
 运行本地 smoke test：
 
 ```bash
@@ -259,6 +267,16 @@ python scripts/schema_tool.py --command ddl
 ```bash
 python scripts/schema_tool.py --command ddl --use-fallbacks
 ```
+
+## 免费图床和图片托管
+
+如果 Notion connector 支持原生上传图片，优先让 connector 直接上传。connector 无法上传本地图片时，可以考虑这些免费或有免费额度的方案：
+
+- **GitHub public repo + [jsDelivr](https://github.com/jsdelivr/jsdelivr)**：适合公开研究笔记和静态证据图片。把图片提交到公开仓库后，使用 `https://cdn.jsdelivr.net/gh/<owner>/<repo>@<commit>/<path>` 这类 URL。jsDelivr 对开源文件免费，并支持 GitHub-backed CDN。
+- **[Cloudinary free plan](https://cloudinary.com/documentation/billing_and_plans)**：适合需要 API 上传、素材管理后台、图片变换和 CDN 的场景。Cloudinary free plan 当前提供每月 credits，可用于 transformations、storage 和 bandwidth。
+- **Local evidence pack**：适合不便公开的图片、受版权限制的图，或还没准备发布的报告。使用 `scripts/build_evidence_pack.py` 生成本地 HTML evidence pack，然后在 Notion 页面里说明或链接这个本地包。
+
+如果论文 license 或团队策略不允许公开分发图片，不建议把论文图表上传到公共图床。
 
 ## Payload 工作流
 
@@ -330,7 +348,7 @@ python scripts/publish_notion_payload.py notion_payload.json --if-exists update
 
 - 从 `.txt`、`.md`、`.csv`、Zotero export 或 Notion backlog 批量导入。
 - 可选 GitHub/jsDelivr 图片托管 helper，生成 Notion 可访问图片 URL。
-- arXiv source asset extraction，获取更高质量的图和表。
+- 更深入的 arXiv source asset extraction，在官方 HTML 渲染之外获取更高质量的图和表。
 - Semantic Scholar 或 OpenAlex citation enrichment。
 - 可选每日论文发现模式：arXiv 分类、关键词兴趣、评分和会议追踪。
 - 团队阅读模式：assignee、priority、review status、weekly digest。
@@ -338,4 +356,4 @@ python scripts/publish_notion_payload.py notion_payload.json --if-exists update
 
 ## License
 
-当前还没有选择 license。准备面向更广泛的外部用户发布前，建议补充 license。
+MIT License。见 [LICENSE](LICENSE)。

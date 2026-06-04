@@ -21,6 +21,7 @@ Use this reference when preparing public copy, comparing adjacent tools, or deci
 - Connector-aware setup for Codex Notion plugin, Claude Notion connector, and WorkBuddy Connector with MCP + CLI or Skill + CLI.
 - Single-paper Notion REST fallback for runtimes without a first-class connector.
 - Source registry and reading-pack contract for papers with multiple sources.
+- Official arXiv HTML reading-pack extraction for papers with available `https://arxiv.org/html/<arxiv_id>` renderings.
 - Local payload generation and validation before Notion writes.
 - Built-in environment validation and `Attention Is All You Need` smoke test.
 
@@ -28,7 +29,7 @@ Use this reference when preparing public copy, comparing adjacent tools, or deci
 
 - No full CLI application or Web UI yet.
 - No batch import flow yet.
-- No built-in arXiv LaTeX source extraction or table-to-image renderer yet.
+- No built-in arXiv LaTeX source asset extraction or table-to-image renderer yet.
 - No GitHub image hosting automation yet.
 - No Semantic Scholar citation enrichment yet.
 - No daily arXiv discovery, conference tracking, or 5D scoring engine yet.
@@ -41,7 +42,7 @@ Use this reference when preparing public copy, comparing adjacent tools, or deci
 
 1. Batch import from `.txt`, `.md`, `.csv`, Zotero export, or Notion backlog.
 2. Optional GitHub/jsDelivr image hosting helper for Notion-safe image URLs.
-3. arXiv source asset extraction for higher-quality figures and tables.
+3. Deeper arXiv source asset extraction for higher-quality figures and tables beyond the official HTML rendering.
 4. Semantic Scholar/OpenAlex citation count enrichment.
 5. Optional daily discovery mode with arXiv categories, keyword interests, recency/popularity/social scoring, and conference tracking.
 6. Optional team-reading mode with assignee, comments, priority, status board, and weekly digest views.

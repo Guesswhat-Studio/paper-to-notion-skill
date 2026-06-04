@@ -48,6 +48,7 @@ Read `references/deep-reading-contract.md` before processing a paper. The readin
 - Resolve the paper identity from PDF, arXiv, DOI, URL, or title.
 - Build a compact source registry and reading pack before writing.
 - Extract and verify metadata from the paper itself or official sources.
+- For arXiv papers, prefer the official arXiv HTML rendering at `https://arxiv.org/html/<arxiv_id>` when available. Use `scripts/fetch_arxiv_html.py` to build a structured reading pack before falling back to PDF text/crops.
 - Classify the paper type and adapt the reading strategy.
 - Capture evidence: title/author header, formulas, algorithms, theorems, models, architecture diagrams, result figures, tables, ablations, and robustness panels as applicable.
 - Explain every evidence block in terms of its role in the paper's argument.
@@ -105,6 +106,7 @@ Do not add long analytical fields such as contribution, technical core, limitati
 ## Useful Scripts
 
 - `scripts/setup_environment.py`: Check Python/PDF dependencies and optionally create the skill-local `.venv`.
+- `scripts/fetch_arxiv_html.py`: Fetch official arXiv HTML renderings and extract title, authors, abstract, sections, figures, tables, and equation counts into a reading pack.
 - `scripts/smoke_test_attention.py`: Download and parse the Attention Is All You Need paper, then generate a local test report and payload.
 - `scripts/schema_tool.py`: Validate `config/notion_schema.yaml` and render Notion DDL/add-column statements.
 - `scripts/build_notion_payload.py`: Normalize metadata and report paths into a `notion_payload.json` file.

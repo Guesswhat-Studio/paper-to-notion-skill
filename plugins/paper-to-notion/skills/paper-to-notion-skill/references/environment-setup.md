@@ -92,6 +92,7 @@ The setup is healthy when:
 - `requests` can make HTTPS requests when network is enabled.
 - `scripts/build_notion_payload.py` and `scripts/validate_notion_payload.py` run successfully on a small sample.
 - `scripts/schema_tool.py --command validate` runs successfully.
+- `scripts/fetch_arxiv_html.py 1706.03762 --output .paper-notion/arxiv-html-test --limit 5` runs successfully when arXiv HTML and network access are available.
 - `scripts/publish_notion_payload.py <payload> --dry-run` runs successfully for a valid sample payload.
 
 ## Sample Paper Smoke Test
