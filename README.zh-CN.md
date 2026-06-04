@@ -102,6 +102,17 @@ Claude Cowork 用户可以在 `Customize -> Plugins` 里添加同一个 GitHub �
 - [Create and distribute plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
 - [Plugins reference](https://code.claude.com/docs/en/plugins-reference)
 
+## CI
+
+GitHub Actions 会在 push 和 pull request 时运行轻量验证：
+
+- 编译 Python helper scripts。
+- 用 `tools/validate_repository.py` 检查仓库打包结构和 Claude plugin 副本同步。
+- 校验 Notion schema。
+- 检查 helper CLI 入口。
+
+arXiv network smoke test 只在手动 `workflow_dispatch` 且设置 `run_network_smoke=true` 时运行，避免临时网络或 arXiv 波动阻塞普通 PR。
+
 ## 这个 Skill 能做什么
 
 - 从本地 PDF、arXiv URL、DOI、论文 URL 或论文标题开始阅读。

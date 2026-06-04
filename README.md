@@ -170,6 +170,17 @@ claude plugin install paper-to-notion@guesswhat-paper-tools
 
 For WorkBuddy or other compatible runtimes, add this repository as a skill/workflow directory and make `SKILL.md` available to the agent.
 
+## CI
+
+GitHub Actions runs a lightweight validation workflow on push and pull request:
+
+- Compile Python helper scripts.
+- Validate repository packaging and Claude plugin mirror files with `tools/validate_repository.py`.
+- Validate the Notion schema.
+- Check helper CLI entry points.
+
+The arXiv network smoke test is available through manual `workflow_dispatch` with `run_network_smoke=true` so temporary network or arXiv issues do not block normal PRs.
+
 ## What The Agent Sets Up
 
 After installation, Codex or Claude should perform the remaining setup from the skill instructions:
