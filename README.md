@@ -25,12 +25,21 @@ Install it into my Codex skills directory, then use $paper-to-notion-skill to se
 
 Claude Code plugin commands are handled by the Claude Code CLI. The model cannot run `/plugin marketplace add` or `/plugin install` for you from inside a chat session. Run the install command yourself, then ask the installed skill to set up the workflow.
 
-In an interactive Claude Code session, type:
+In an interactive Claude Code session, run these one at a time. Press Enter after each command and wait for it to finish before typing the next one:
 
 ```text
 /plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill
+```
+
+```text
 /plugin install paper-to-notion@guesswhat-paper-tools
+```
+
+```text
 /reload-plugins
+```
+
+```text
 /paper-to-notion:paper-to-notion-skill set up my Notion paper reading workflow
 ```
 

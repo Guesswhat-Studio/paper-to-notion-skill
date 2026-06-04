@@ -27,12 +27,21 @@ https://github.com/Guesswhat-Studio/paper-to-notion-skill
 
 Claude Code 的 plugin 命令由 Claude Code CLI 自己处理。模型在聊天里不能替你执行 `/plugin marketplace add` 或 `/plugin install`。请你先手动运行安装命令，再让安装好的 skill 继续做 setup。
 
-在 Claude Code 交互会话里输入：
+在 Claude Code 交互会话里逐条输入。每输入一条就按 Enter，等它执行完成后再输入下一条：
 
 ```text
 /plugin marketplace add https://github.com/Guesswhat-Studio/paper-to-notion-skill
+```
+
+```text
 /plugin install paper-to-notion@guesswhat-paper-tools
+```
+
+```text
 /reload-plugins
+```
+
+```text
 /paper-to-notion:paper-to-notion-skill set up my Notion paper reading workflow
 ```
 
