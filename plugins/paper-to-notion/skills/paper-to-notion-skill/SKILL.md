@@ -86,6 +86,7 @@ Read `references/notion-publishing.md` before writing to Notion. The writing lay
 - When using local-only images, build a self-contained local evidence pack with `scripts/build_evidence_pack.py` and link or mention that single HTML file in the Notion page instead of only listing an image folder.
 - Preserve formulas as LaTeX and convert important numerical comparisons into Markdown tables.
 - Analyze experiments, baselines, metrics, result values, ablations, and conclusion boundaries. A shallow summary is not acceptable for a paper-reading request.
+- Run `scripts/validate_report_quality.py` on the report before building or publishing the Notion payload. Treat validation errors as a stop condition: fix the report instead of publishing a shallow page.
 - Generate `notion_payload.json` before writing when possible, then validate it with `scripts/validate_notion_payload.py`. If `content.image_status` is `hosted`, run the validator with `--check-image-urls` before writing to Notion.
 - If the runtime has no first-class Notion connector, optionally publish one paper with `scripts/publish_notion_payload.py` only after the user explicitly chooses a token-based fallback.
 - Use DOI, arXiv ID, or normalized original title for deduplication.
@@ -132,6 +133,7 @@ Do not add long analytical fields such as contribution, technical core, limitati
 - `scripts/schema_tool.py`: Validate `config/notion_schema.yaml` and render Notion DDL/add-column statements.
 - `scripts/build_notion_payload.py`: Normalize metadata and report paths into a `notion_payload.json` file.
 - `scripts/build_evidence_pack.py`: Build a self-contained local HTML evidence pack from Markdown image links.
+- `scripts/validate_report_quality.py`: Validate report depth, required sections, bilingual overview, image policy, code audit, source registry, and arXiv hosted-figure usage before payload creation or publishing.
 - `scripts/validate_notion_payload.py`: Validate required fields, language, rating, URLs, dedup key, report existence, and optionally hosted image reachability before publishing.
 - `scripts/publish_notion_payload.py`: Single-paper Notion REST fallback. Validates a payload, deduplicates by DOI/arXiv/title, then creates or updates one Notion page.
 

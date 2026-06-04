@@ -171,6 +171,7 @@ For private repository installs, the user must already have GitHub access to `Gu
 - Reuses arXiv HTML figure URLs as hosted Notion images only after the generated URLs pass reachability checks.
 - Extracts evidence from formulas, figures, tables, algorithms, theorems, model diagrams, ablations, robustness panels, and result sections when available.
 - Generates Notion-ready reports with source-grounded claims and explicit uncertainty markers.
+- Validates report depth and template compliance before payload creation, so shallow notes do not get published just because the payload schema is valid.
 - Creates or updates a Notion database page using DOI, arXiv ID, or normalized original title for deduplication.
 - Keeps the Notion database compact while putting deep analysis in the page body.
 - Provides local validation scripts, schema tooling, and a smoke test based on "Attention Is All You Need".
@@ -188,7 +189,7 @@ paper-to-notion-skill/
   config/notion_schema.yaml        # Default Notion database schema
   plugins/paper-to-notion/         # Claude Code plugin package (mirrored skill copy)
   references/                      # Reading, publishing, connector, and setup contracts
-  scripts/                         # Environment, payload, validation, and publishing helpers
+  scripts/                         # Environment, report-quality, payload, validation, and publishing helpers
   tools/                           # Repository validation and plugin-sync helpers
 ```
 
@@ -238,6 +239,13 @@ After changing `SKILL.md`, `requirements.txt`, `agents/`, `config/`, `references
 
 ```bash
 python tools/sync_plugin.py
+```
+
+Before publishing a report, run:
+
+```bash
+python scripts/validate_report_quality.py paper-output/report.md --payload paper-output/notion_payload.json
+python scripts/validate_notion_payload.py paper-output/notion_payload.json --check-image-urls
 ```
 
 Use this check before committing:

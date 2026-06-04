@@ -50,12 +50,21 @@ def element_id(node: Any, fallback: str) -> str:
 
 
 def resolve_asset_url(base_url: str, src: str) -> str:
-    """Resolve arXiv HTML asset URLs without dropping the paper-id path segment."""
+    """Resolve arXiv HTML asset URLs against the paper document URL.
+
+    arXiv HTML currently emits at least two relative asset shapes:
+    - `2605.29582v1/x1.png`, which is a sibling under `/html/`.
+    - `extracted/...` or `figures/...`, which is relative to the paper HTML
+      document directory.
+    """
     src = str(src or "").strip()
     if not src or src.startswith("data:"):
         return ""
-    directory_base = base_url if base_url.endswith("/") else f"{base_url}/"
-    return urljoin(directory_base, src)
+    if src.startswith(("http://", "https://", "//", "/")):
+        return urljoin(base_url, src)
+    if re.match(r"^\d{4}\.\d{4,5}(?:v\d+)?/", src):
+        return urljoin(base_url, src)
+    return urljoin(base_url.rstrip("/") + "/", src)
 
 
 def check_image_url(
