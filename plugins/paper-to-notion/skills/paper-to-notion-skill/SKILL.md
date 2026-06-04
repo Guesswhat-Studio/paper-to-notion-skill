@@ -21,11 +21,11 @@ Use this skill to turn papers into durable Notion records: a lean database row f
 Keep routing practical and limited to common cases:
 
 1. **Local PDF**: Use the PDF path. Extract the text layer, crop useful evidence images, and use OCR only when the text layer is missing or unusable.
-2. **arXiv link or ID**: Resolve the arXiv ID, fetch metadata from the abstract page, then try `scripts/fetch_arxiv_html.py`. If official HTML is available, use it for sections, formulas, tables, and figure URLs. If HTML is unavailable or incomplete, fall back to the PDF path.
+2. **arXiv link or ID**: Resolve the arXiv ID, fetch metadata from the abstract page, then try `scripts/fetch_arxiv_html.py`. If official HTML is available, use it for sections, formulas, tables, and verified figure URLs. If HTML is unavailable or incomplete, fall back to the PDF path.
 3. **Publisher URL, DOI, or title**: Fetch public metadata and resolve the official page. If full-text HTML is accessible, parse it. If access is blocked or only abstract metadata is public, ask the user for the PDF and continue through the PDF path.
 4. **Existing report or payload**: Skip reading. Validate or build `notion_payload.json`, deduplicate, publish, and verify.
 
-For arXiv HTML figures, official `https://arxiv.org/html/...` image URLs may be used directly as hosted external image links in Notion when they are present and accessible. For long-term public archives or high-traffic use, prefer caching those images to a user-controlled host such as GitHub/jsDelivr or Cloudinary.
+For arXiv HTML figures, official `https://arxiv.org/html/...` image URLs may be used directly as hosted external image links in Notion only when they are present and accessible. Use the URLs emitted by `scripts/fetch_arxiv_html.py`; it resolves relative image paths against the actual HTML page and marks `image_accessible`. If an image URL is missing or inaccessible, do not embed it in Notion. Fall back to PDF crops plus a local evidence pack, or cite the figure/table label in text. For long-term public archives or high-traffic use, prefer caching accessible images to a user-controlled host such as GitHub/jsDelivr or Cloudinary.
 
 ## Setup Layer
 
@@ -60,7 +60,7 @@ Read `references/deep-reading-contract.md` before processing a paper. The readin
 - Resolve the paper identity from PDF, arXiv, DOI, URL, or title.
 - Build a compact source registry and reading pack before writing.
 - Extract and verify metadata from the paper itself or official sources.
-- For arXiv papers, prefer the official arXiv HTML rendering at `https://arxiv.org/html/<arxiv_id>` when available. Use `scripts/fetch_arxiv_html.py` to build a structured reading pack before falling back to PDF text/crops.
+- For arXiv papers, prefer the official arXiv HTML rendering at `https://arxiv.org/html/<arxiv_id>` when available. Use `scripts/fetch_arxiv_html.py` to build a structured reading pack with validated figure URLs before falling back to PDF text/crops.
 - Classify the paper type and adapt the reading strategy.
 - Capture evidence: title/author header, formulas, algorithms, theorems, models, architecture diagrams, result figures, tables, ablations, and robustness panels as applicable.
 - Explain every evidence block in terms of its role in the paper's argument.
@@ -77,7 +77,7 @@ Read `references/notion-publishing.md` before writing to Notion. The writing lay
 - When using local-only images, build a self-contained local evidence pack with `scripts/build_evidence_pack.py` and link or mention that single HTML file in the Notion page instead of only listing an image folder.
 - Preserve formulas as LaTeX and convert important numerical comparisons into Markdown tables.
 - Analyze experiments, baselines, metrics, result values, ablations, and conclusion boundaries. A shallow summary is not acceptable for a paper-reading request.
-- Generate `notion_payload.json` before writing when possible, then validate it with `scripts/validate_notion_payload.py`.
+- Generate `notion_payload.json` before writing when possible, then validate it with `scripts/validate_notion_payload.py`. If `content.image_status` is `hosted`, run the validator with `--check-image-urls` before writing to Notion.
 - If the runtime has no first-class Notion connector, optionally publish one paper with `scripts/publish_notion_payload.py` only after the user explicitly chooses a token-based fallback.
 - Use DOI, arXiv ID, or normalized original title for deduplication.
 - Create a new page in the paper database when no match exists; update the existing page when a match exists.
@@ -118,12 +118,12 @@ Do not add long analytical fields such as contribution, technical core, limitati
 ## Useful Scripts
 
 - `scripts/setup_environment.py`: Check Python/PDF dependencies and optionally create the skill-local `.venv`.
-- `scripts/fetch_arxiv_html.py`: Fetch official arXiv HTML renderings and extract title, authors, abstract, sections, figures, tables, and equation counts into a reading pack.
+- `scripts/fetch_arxiv_html.py`: Fetch official arXiv HTML renderings and extract title, authors, abstract, sections, verified figures, tables, and equation counts into a reading pack.
 - `scripts/smoke_test_attention.py`: Download and parse the Attention Is All You Need paper, then generate a local test report and payload.
 - `scripts/schema_tool.py`: Validate `config/notion_schema.yaml` and render Notion DDL/add-column statements.
 - `scripts/build_notion_payload.py`: Normalize metadata and report paths into a `notion_payload.json` file.
 - `scripts/build_evidence_pack.py`: Build a self-contained local HTML evidence pack from Markdown image links.
-- `scripts/validate_notion_payload.py`: Validate required fields, language, rating, URLs, dedup key, and report existence before publishing.
+- `scripts/validate_notion_payload.py`: Validate required fields, language, rating, URLs, dedup key, report existence, and optionally hosted image reachability before publishing.
 - `scripts/publish_notion_payload.py`: Single-paper Notion REST fallback. Validates a payload, deduplicates by DOI/arXiv/title, then creates or updates one Notion page.
 
 ## Public Positioning

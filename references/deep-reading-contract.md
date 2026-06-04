@@ -35,7 +35,7 @@ Use only these common routes unless the user asks for a specialized workflow:
 | Publisher URL, DOI, or title | Metadata-first: fetch public metadata and official page; parse accessible full-text HTML when available; ask for PDF when the page is paywalled, login-gated, or abstract-only. |
 | Existing `report.md`, `metadata.json`, or `notion_payload.json` | Publish-only: validate/build payload, deduplicate, publish, and verify. |
 
-For arXiv HTML figures, use the official image URLs directly as hosted image links when they are present in the HTML extraction and load over HTTPS. Mark the payload `image_status` as `hosted`. If durability, public redistribution, or workspace policy matters, cache the images to a user-controlled host or use a local evidence pack.
+For arXiv HTML figures, use the official image URLs directly as hosted image links only when they are present in the HTML extraction and load over HTTPS. Trust the resolved `image_url` from `scripts/fetch_arxiv_html.py`, not raw relative `src` values from the HTML. Mark the payload `image_status` as `hosted` only when every embedded image is reachable. If any image is unreachable, omit that image from Notion and use PDF crops plus a local evidence pack, or cite the figure/table label in text. If durability, public redistribution, or workspace policy matters, cache accessible images to a user-controlled host or use a local evidence pack.
 
 ## Language Modes
 
@@ -56,9 +56,9 @@ For arXiv HTML figures, use the official image URLs directly as hosted image lin
    - Verify title, authors, and affiliations against page 1.
 3. For arXiv papers:
    - Prefer the abstract page for metadata.
-   - Prefer the official arXiv HTML rendering at `https://arxiv.org/html/<arxiv_id>` when available. Run `scripts/fetch_arxiv_html.py` to create a structured reading pack with title, authors, abstract, sections, figures, tables, and equation counts.
+   - Prefer the official arXiv HTML rendering at `https://arxiv.org/html/<arxiv_id>` when available. Run `scripts/fetch_arxiv_html.py` to create a structured reading pack with title, authors, abstract, sections, verified figure URLs, tables, and equation counts.
    - Prefer HTML-linked figures/tables or source assets when they are easy to obtain and higher quality than PDF crops.
-   - Use official arXiv HTML figure URLs directly in Notion when external hosted images are acceptable.
+   - Use official arXiv HTML figure URLs directly in Notion only when `image_accessible` is true or the payload validator confirms the hosted image URL is reachable.
    - Use PDF crops when source assets are unavailable or unsuitable.
 4. For titles or DOI:
    - Resolve to an official page before reading when network tools are available.
@@ -243,7 +243,7 @@ Before publishing:
 
 - Metadata is verified against official sources or the PDF.
 - The source registry distinguishes used sources from checked-but-not-found sources.
-- Local evidence images are extracted when useful; if they cannot be embedded in Notion, the page states the connector limitation and points to the local evidence pack.
+- Local evidence images are extracted when useful; if they cannot be embedded in Notion, or hosted arXiv images fail reachability checks, the page states the image limitation and points to the local evidence pack.
 - Important formulas are in LaTeX.
 - Technical evidence is not just summarized; it is interpreted.
 - Method analysis identifies the mechanism, tensor/object flow, and design trade-offs.
@@ -251,4 +251,4 @@ Before publishing:
 - Ablations or component variations are analyzed when the paper provides them.
 - Code availability is checked or the failure to check is disclosed.
 - Report language matches the user's request.
-- Notion image status is honest: embedded, local-only, or absent.
+- Notion image status is honest: hosted, local-only, placeholder, or no images. Hosted image URLs are checked before publishing.

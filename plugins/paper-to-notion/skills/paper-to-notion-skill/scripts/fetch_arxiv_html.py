@@ -49,6 +49,39 @@ def element_id(node: Any, fallback: str) -> str:
     return str(value or fallback)
 
 
+def resolve_asset_url(base_url: str, src: str) -> str:
+    """Resolve arXiv HTML asset URLs without dropping the paper-id path segment."""
+    src = str(src or "").strip()
+    if not src or src.startswith("data:"):
+        return ""
+    directory_base = base_url if base_url.endswith("/") else f"{base_url}/"
+    return urljoin(directory_base, src)
+
+
+def check_image_url(
+    session: requests.Session,
+    url: str,
+    timeout: int = 20,
+) -> tuple[bool, int | None, str, str]:
+    if not url:
+        return False, None, "", ""
+
+    headers = {"User-Agent": "paper-to-notion-skill/0.1"}
+    try:
+        response = session.head(url, allow_redirects=True, timeout=timeout, headers=headers)
+        if response.status_code in {403, 405}:
+            response.close()
+            response = session.get(url, allow_redirects=True, timeout=timeout, headers=headers, stream=True)
+        status_code = response.status_code
+        final_url = response.url
+        content_type = response.headers.get("Content-Type", "")
+        response.close()
+    except requests.RequestException:
+        return False, None, url, ""
+
+    return status_code < 400, status_code, final_url, content_type
+
+
 def collect_sections(soup: BeautifulSoup, limit: int | None = None) -> list[dict[str, str]]:
     sections: list[dict[str, str]] = []
     for index, section in enumerate(soup.select("section.ltx_section, section"), start=1):
@@ -62,8 +95,15 @@ def collect_sections(soup: BeautifulSoup, limit: int | None = None) -> list[dict
     return sections
 
 
-def collect_figures(soup: BeautifulSoup, base_url: str, limit: int | None = None) -> list[dict[str, str]]:
-    figures: list[dict[str, str]] = []
+def collect_figures(
+    soup: BeautifulSoup,
+    base_url: str,
+    limit: int | None = None,
+    check_images: bool = True,
+    image_timeout: int = 20,
+) -> list[dict[str, Any]]:
+    figures: list[dict[str, Any]] = []
+    session = requests.Session()
     for index, figure in enumerate(soup.select("figure"), start=1):
         image = figure.find("img")
         if not image:
@@ -71,10 +111,26 @@ def collect_figures(soup: BeautifulSoup, base_url: str, limit: int | None = None
         caption = text_of(figure.select_one("figcaption")) or text_of(figure)
         src = image.get("src", "")
         alt = image.get("alt", "")
+        candidate_url = resolve_asset_url(base_url, src)
+        image_url = candidate_url
+        image_accessible: bool | None = None
+        image_status_code: int | None = None
+        image_content_type = ""
+        if check_images and candidate_url:
+            image_accessible, image_status_code, final_url, image_content_type = check_image_url(
+                session,
+                candidate_url,
+                timeout=image_timeout,
+            )
+            image_url = final_url if image_accessible else ""
         figures.append(
             {
                 "id": element_id(figure, f"figure-{index}"),
-                "image_url": urljoin(base_url, src) if src else "",
+                "image_url": image_url,
+                "candidate_image_url": candidate_url,
+                "image_accessible": image_accessible,
+                "image_status_code": image_status_code,
+                "image_content_type": image_content_type,
                 "alt": " ".join(str(alt).split()),
                 "caption": caption,
             }
@@ -111,7 +167,14 @@ def collect_tables(soup: BeautifulSoup, limit: int | None = None) -> list[dict[s
     return tables
 
 
-def extract(html: str, url: str, arxiv_id: str, limit: int | None = None) -> dict[str, Any]:
+def extract(
+    html: str,
+    url: str,
+    arxiv_id: str,
+    limit: int | None = None,
+    check_images: bool = True,
+    image_timeout: int = 20,
+) -> dict[str, Any]:
     soup = BeautifulSoup(html, "lxml")
     title = first_text(soup, ["h1.ltx_title_document", "h1.ltx_title", ".ltx_title_document", "h1"])
     authors = first_text(soup, [".ltx_authors", ".authors"])
@@ -127,7 +190,13 @@ def extract(html: str, url: str, arxiv_id: str, limit: int | None = None) -> dic
         "authors": authors,
         "abstract": abstract,
         "sections": collect_sections(soup, limit=limit),
-        "figures": collect_figures(soup, url, limit=limit),
+        "figures": collect_figures(
+            soup,
+            url,
+            limit=limit,
+            check_images=check_images,
+            image_timeout=image_timeout,
+        ),
         "tables": collect_tables(soup, limit=limit),
         "equation_count": len(equations),
     }
@@ -157,6 +226,9 @@ def write_markdown(data: dict[str, Any], path: Path) -> None:
         label = f"- `{figure['id']}`"
         if figure.get("image_url"):
             label += f" {figure['image_url']}"
+        elif figure.get("candidate_image_url"):
+            status = figure.get("image_status_code") or "unknown"
+            label += f" unavailable image: {figure['candidate_image_url']} (status: {status})"
         lines.append(label)
         if figure.get("caption"):
             lines.append(f"  {figure['caption']}")
@@ -176,6 +248,8 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=Path(".paper-notion/arxiv-html"))
     parser.add_argument("--limit", type=int, default=0, help="Limit sections/figures/tables in the output")
     parser.add_argument("--save-html", action="store_true", help="Save the fetched HTML beside the extracted files")
+    parser.add_argument("--no-check-images", action="store_true", help="Skip HTTP checks for extracted figure URLs")
+    parser.add_argument("--image-timeout", type=int, default=20, help="Per-image URL check timeout in seconds")
     args = parser.parse_args()
 
     arxiv_id = normalize_arxiv_id(args.paper)
@@ -187,7 +261,14 @@ def main() -> int:
 
     args.output.mkdir(parents=True, exist_ok=True)
     limit = args.limit or None
-    data = extract(response.text, url, arxiv_id, limit=limit)
+    data = extract(
+        response.text,
+        url,
+        arxiv_id,
+        limit=limit,
+        check_images=not args.no_check_images,
+        image_timeout=args.image_timeout,
+    )
 
     json_path = args.output / "arxiv_html_extract.json"
     markdown_path = args.output / "arxiv_html_reading_pack.md"

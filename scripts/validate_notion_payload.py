@@ -81,6 +81,28 @@ def is_public_or_placeholder(link: str) -> bool:
     )
 
 
+def check_remote_image_url(link: str, timeout: int) -> tuple[bool, int | None, str, str]:
+    try:
+        import requests
+    except ImportError as exc:
+        raise SystemExit("requests is required for --check-image-urls") from exc
+
+    headers = {"User-Agent": "paper-to-notion-skill/0.1"}
+    try:
+        response = requests.head(link, allow_redirects=True, timeout=timeout, headers=headers)
+        if response.status_code in {403, 405}:
+            response.close()
+            response = requests.get(link, allow_redirects=True, timeout=timeout, headers=headers, stream=True)
+        status_code = response.status_code
+        final_url = response.url
+        content_type = response.headers.get("Content-Type", "")
+        response.close()
+    except requests.RequestException:
+        return False, None, link, ""
+
+    return status_code < 400, status_code, final_url, content_type
+
+
 def validate_option_value(field: str, value: Any, prop: dict[str, Any], errors: list[str]) -> None:
     allowed = option_names(prop)
     if allowed and str(value).strip() not in allowed:
@@ -91,6 +113,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("payload", type=Path)
     parser.add_argument("--schema", type=Path, default=DEFAULT_SCHEMA, help="Notion schema YAML path")
+    parser.add_argument("--check-image-urls", action="store_true", help="Check hosted Markdown image URLs over HTTP before publishing")
+    parser.add_argument("--image-timeout", type=int, default=20, help="Per-image URL check timeout in seconds")
     args = parser.parse_args()
 
     payload = load_payload(args.payload)
@@ -178,6 +202,17 @@ def main() -> int:
         placeholder_links = [link for link in image_links(markdown) if link.startswith("__PUBLIC_IMAGE_PREFIX__/")]
         if placeholder_links:
             errors.append("image_status is hosted but markdown still contains placeholder image links")
+        if args.check_image_urls:
+            for link in image_links(markdown):
+                if not link.startswith(("http://", "https://")):
+                    continue
+                ok, status_code, final_url, content_type = check_remote_image_url(link, args.image_timeout)
+                status = status_code if status_code is not None else "unknown"
+                if not ok:
+                    errors.append(f"Hosted image URL is not reachable: {link} (status: {status})")
+                    continue
+                if content_type and not content_type.lower().startswith("image/"):
+                    warnings.append(f"Hosted image URL did not return an image content type: {final_url} ({content_type})")
 
     for warning in warnings:
         print(f"WARNING: {warning}")

@@ -111,6 +111,29 @@ def validate_venv_python_resolution(errors: list[str]) -> None:
         errors.append(f"venv layout validation failed: {exc}")
 
 
+def validate_arxiv_asset_resolution(errors: list[str]) -> None:
+    try:
+        import importlib.util
+
+        script_path = ROOT / "scripts" / "fetch_arxiv_html.py"
+        spec = importlib.util.spec_from_file_location("fetch_arxiv_html", script_path)
+        if spec is None or spec.loader is None:
+            errors.append("Could not load scripts/fetch_arxiv_html.py for asset URL validation")
+            return
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        resolved = module.resolve_asset_url(
+            "https://arxiv.org/html/2503.14232",
+            "extracted/6458440/images/fig1-min.png",
+        )
+        expected = "https://arxiv.org/html/2503.14232/extracted/6458440/images/fig1-min.png"
+        if resolved != expected:
+            errors.append(f"arXiv asset URL resolution regressed: expected {expected}, got {resolved}")
+    except Exception as exc:  # noqa: BLE001 - report validation failure with context.
+        errors.append(f"arXiv asset URL validation failed: {exc}")
+
+
 def main() -> int:
     errors: list[str] = []
     for path in [
@@ -127,6 +150,7 @@ def main() -> int:
     validate_manifests(errors)
     validate_mirrors(errors)
     validate_venv_python_resolution(errors)
+    validate_arxiv_asset_resolution(errors)
 
     if errors:
         for error in errors:

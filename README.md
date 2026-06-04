@@ -168,7 +168,7 @@ For private repository installs, the user must already have GitHub access to `Gu
 - Resolves paper identity and verifies metadata from the paper or official sources.
 - Builds a source registry and reading pack before writing the report.
 - Uses official arXiv HTML renderings when available at `https://arxiv.org/html/<arxiv_id>`.
-- Reuses arXiv HTML figure URLs directly as hosted Notion images when they are available over HTTPS.
+- Reuses arXiv HTML figure URLs as hosted Notion images only after the generated URLs pass reachability checks.
 - Extracts evidence from formulas, figures, tables, algorithms, theorems, model diagrams, ablations, robustness panels, and result sections when available.
 - Generates Notion-ready reports with source-grounded claims and explicit uncertainty markers.
 - Creates or updates a Notion database page using DOI, arXiv ID, or normalized original title for deduplication.
@@ -376,7 +376,7 @@ Please detect my runtime, check whether Notion read/write access is available, c
 Common input routing is intentionally simple:
 
 - Local PDF: parse the PDF and crop evidence.
-- arXiv link or ID: try official arXiv HTML first, including figure URLs; fall back to PDF.
+- arXiv link or ID: try official arXiv HTML first, including verified figure URLs; fall back to PDF.
 - Publisher URL, DOI, or title: fetch metadata and accessible full-text HTML; ask for PDF if access is blocked.
 - Existing report or payload: skip reading and publish only.
 
