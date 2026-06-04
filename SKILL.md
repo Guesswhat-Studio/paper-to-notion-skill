@@ -16,6 +16,17 @@ Use this skill to turn papers into durable Notion records: a lean database row f
 - **Publish-only request**: If the user already has a report or `notion_payload.json`, skip PDF reading and run only the Notion publishing and validation steps.
 - **Research-flow request**: If the user asks for daily arXiv discovery, conference tracking, paper scoring, team assignment, or weekly digests, treat that as an optional extension. Keep the default database lean unless the user approves discovery/team fields.
 
+## Simple Input Router
+
+Keep routing practical and limited to common cases:
+
+1. **Local PDF**: Use the PDF path. Extract the text layer, crop useful evidence images, and use OCR only when the text layer is missing or unusable.
+2. **arXiv link or ID**: Resolve the arXiv ID, fetch metadata from the abstract page, then try `scripts/fetch_arxiv_html.py`. If official HTML is available, use it for sections, formulas, tables, and figure URLs. If HTML is unavailable or incomplete, fall back to the PDF path.
+3. **Publisher URL, DOI, or title**: Fetch public metadata and resolve the official page. If full-text HTML is accessible, parse it. If access is blocked or only abstract metadata is public, ask the user for the PDF and continue through the PDF path.
+4. **Existing report or payload**: Skip reading. Validate or build `notion_payload.json`, deduplicate, publish, and verify.
+
+For arXiv HTML figures, official `https://arxiv.org/html/...` image URLs may be used directly as hosted external image links in Notion when they are present and accessible. For long-term public archives or high-traffic use, prefer caching those images to a user-controlled host such as GitHub/jsDelivr or Cloudinary.
+
 ## Setup Layer
 
 1. Detect the runtime and Notion capability.

@@ -108,6 +108,7 @@ Claude Cowork 用户可以在 `Customize -> Plugins` 里添加同一个 GitHub �
 - 从论文原文或官方来源核对标题、作者、日期、venue、DOI、arXiv、代码仓库等元数据。
 - 写报告前先建立 source registry 和 reading pack，减少无来源推断。
 - arXiv 论文优先使用官方 HTML 渲染：`https://arxiv.org/html/<arxiv_id>`。
+- arXiv HTML 里的 figure 图片 URL 如果是 HTTPS 可访问，可以直接作为 Notion hosted image 外链使用。
 - 抽取并解释关键证据：公式、图、表、算法、定理、模型结构图、实验结果、消融、鲁棒性分析等。
 - 生成 Notion-ready 报告，保留 LaTeX 公式、Markdown 表格、代码和复现检查记录。
 - 使用 DOI、arXiv ID 或规范化原始标题去重，创建或更新 Notion 数据库页面。
@@ -184,6 +185,13 @@ config/notion_schema.yaml
 ```text
 Use $paper-to-notion-skill to set up my Notion paper reading workflow.
 ```
+
+常见输入路由保持简单：
+
+- 本地 PDF：走 PDF 解析和证据截图路径。
+- arXiv 链接或 ID：优先尝试官方 arXiv HTML，包括 figure 图片 URL；HTML 不可用再回退 PDF。
+- Publisher URL、DOI 或标题：先抓 metadata 和可访问的 full-text HTML；如果页面需要权限，请用户提供 PDF。
+- 已有 report 或 payload：跳过阅读，只做 payload 校验和 Notion 发布。
 
 阅读并发布英文报告：
 

@@ -24,6 +24,19 @@ Support these input forms:
 
 If the input is ambiguous, resolve the paper identity before writing. Prefer official sources over search snippets.
 
+## Simple Input Router
+
+Use only these common routes unless the user asks for a specialized workflow:
+
+| Input | Route |
+| --- | --- |
+| Local PDF path | PDF parsing: text layer, metadata verification from page 1, evidence crops, OCR only if needed. |
+| arXiv ID, abstract URL, HTML URL, or PDF URL | arXiv-first: resolve ID, fetch abstract metadata, try official HTML with `scripts/fetch_arxiv_html.py`, then fall back to PDF if HTML is unavailable or incomplete. |
+| Publisher URL, DOI, or title | Metadata-first: fetch public metadata and official page; parse accessible full-text HTML when available; ask for PDF when the page is paywalled, login-gated, or abstract-only. |
+| Existing `report.md`, `metadata.json`, or `notion_payload.json` | Publish-only: validate/build payload, deduplicate, publish, and verify. |
+
+For arXiv HTML figures, use the official image URLs directly as hosted image links when they are present in the HTML extraction and load over HTTPS. Mark the payload `image_status` as `hosted`. If durability, public redistribution, or workspace policy matters, cache the images to a user-controlled host or use a local evidence pack.
+
 ## Language Modes
 
 - Default: English.
@@ -45,6 +58,7 @@ If the input is ambiguous, resolve the paper identity before writing. Prefer off
    - Prefer the abstract page for metadata.
    - Prefer the official arXiv HTML rendering at `https://arxiv.org/html/<arxiv_id>` when available. Run `scripts/fetch_arxiv_html.py` to create a structured reading pack with title, authors, abstract, sections, figures, tables, and equation counts.
    - Prefer HTML-linked figures/tables or source assets when they are easy to obtain and higher quality than PDF crops.
+   - Use official arXiv HTML figure URLs directly in Notion when external hosted images are acceptable.
    - Use PDF crops when source assets are unavailable or unsuitable.
 4. For titles or DOI:
    - Resolve to an official page before reading when network tools are available.

@@ -120,6 +120,7 @@ python scripts/build_evidence_pack.py --report report.md --output evidence_pack.
   In the Notion page, include a concise local-image note that points to the single `evidence_pack.html` file and lists the evidence images by caption. This gives the reader one local artifact to open while keeping the Notion page honest about connector limits.
 - If a connector later exposes local file upload, use it and mark images as embedded. Until then, do not pretend local images were embedded.
 - If the user explicitly allows hosted images, use public image URLs in `notion_markdown`.
+- arXiv HTML figure URLs, such as `https://arxiv.org/html/<id>v<version>/...png`, count as hosted external images when they load over HTTPS. They can be used directly for ordinary Notion notes. For long-term public archives, high-traffic pages, or stricter redistribution policies, cache them to a user-controlled host or keep a local evidence pack.
 
 ## Math Policy
 
