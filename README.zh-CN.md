@@ -10,18 +10,27 @@
 
 这个 skill 通过 agent runtime 已授权的 Notion connector 写入 Notion。正常使用 Codex 或 Claude 时，不需要创建 Notion integration token，也不要把密钥粘贴到 prompt 里。
 
-官方参考：
+Connector 链接和官方参考：
 
+- [Codex Marketplace: Notion plugin](https://www.codex-marketplace.com/plugins/notion)
+- [Claude Notion connector](https://claude.com/connectors/notion)
 - [Notion MCP overview](https://developers.notion.com/guides/mcp/overview)
 - [Connecting to Notion MCP](https://developers.notion.com/guides/mcp/get-started-with-mcp)
 - [Notion MCP security best practices](https://developers.notion.com/guides/mcp/mcp-security-best-practices)
 - [Codex MCP docs](https://developers.openai.com/codex/mcp)
-- [Claude Notion connector](https://claude.com/connectors/notion)
 - [Claude connectors docs](https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities)
 
 安装或运行 skill 前：
 
-- **Codex**：把官方 Notion MCP server 加到 `~/.codex/config.toml`，然后运行 OAuth login：
+- **Codex**：打开 [Codex Marketplace Notion plugin](https://www.codex-marketplace.com/plugins/notion) 并安装。Marketplace 页面列出的安装命令是：
+
+  ```bash
+  npx codex-marketplace add openai/plugins/plugins/notion --plugin
+  ```
+
+  安装后重启或 reload Codex，按提示完成 Notion OAuth 授权，并在 Codex TUI 里用 `/mcp` 确认 Notion 已连接，再运行下面的 setup prompt。
+
+  如果你更想手动配置 MCP，可以把官方 Notion MCP server 加到 `~/.codex/config.toml`，然后运行 OAuth login：
 
   ```toml
   [mcp_servers.notion]
@@ -42,7 +51,7 @@
 
   然后在 Claude Code 里运行 `/mcp`，跟随 OAuth 流程完成授权。之后再运行下面的 plugin setup 命令。
 
-- **Claude / Claude Desktop**：打开官方 [Claude Notion connector](https://claude.com/connectors/notion)，或使用 Claude 的 Connectors UI：`Settings > Connectors`，添加或选择 Notion，并完成 OAuth。Anthropic 的 connector 文档解释了通用连接流程和权限模型。
+- **Claude / Claude Desktop**：打开官方 [Claude Notion connector](https://claude.com/connectors/notion)，或使用 Claude 的 Connectors UI：`Settings > Connectors`，添加或选择 Notion，并完成 OAuth。这个 connector 支持 Claude 直接搜索、创建、编辑和整理 Notion 内容。
 - **还没有 connector**：skill 仍然可以生成本地报告、evidence pack 和 `notion_payload.json`，但应该在写入 Notion 前停止。只有在你明确选择 token fallback 时，才使用 REST fallback。
 
 Notion 推荐的 remote MCP endpoint 是 `https://mcp.notion.com/mcp`。旧版 SSE endpoint 是 `https://mcp.notion.com/sse`；只有在客户端不支持 streamable HTTP 时再使用。
