@@ -10,11 +10,42 @@ The default report language is English. Chinese and bilingual reports are suppor
 
 This skill writes to Notion through the agent runtime's authenticated Notion connector. For normal Codex or Claude use, do not create a Notion integration token and do not paste secrets into prompts.
 
+Official references:
+
+- [Notion MCP overview](https://developers.notion.com/guides/mcp/overview)
+- [Connecting to Notion MCP](https://developers.notion.com/guides/mcp/get-started-with-mcp)
+- [Notion MCP security best practices](https://developers.notion.com/guides/mcp/mcp-security-best-practices)
+- [Codex MCP docs](https://developers.openai.com/codex/mcp)
+- [Claude Notion connector](https://claude.com/connectors/notion)
+- [Claude connectors docs](https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities)
+
 Before installing or running the skill:
 
-- **Codex**: Connect the Notion app/connector in Codex, grant access to the workspace or pages where the paper database should live, then return to this thread and run the setup prompt below.
-- **Claude / Claude Code**: Connect Notion through Claude's connector support or a configured Notion MCP server. In Claude Code, make sure Notion tools are available in the session before asking the plugin to create or update a database.
+- **Codex**: Add the official Notion MCP server to `~/.codex/config.toml`, then run the OAuth login:
+
+  ```toml
+  [mcp_servers.notion]
+  url = "https://mcp.notion.com/mcp"
+  ```
+
+  ```bash
+  codex mcp login notion
+  ```
+
+  In the Codex TUI, use `/mcp` to confirm that `notion` is connected before running the setup prompt below.
+
+- **Claude Code**: Add the official Notion MCP server, then authenticate from Claude Code:
+
+  ```bash
+  claude mcp add --transport http notion https://mcp.notion.com/mcp
+  ```
+
+  Then run `/mcp` inside Claude Code and complete the OAuth flow. After that, run the plugin setup command below.
+
+- **Claude / Claude Desktop**: Open the official [Claude Notion connector](https://claude.com/connectors/notion), or use Claude's Connectors UI: `Settings > Connectors`, add or select Notion, and complete OAuth. Anthropic's connector docs explain the general flow and permission model.
 - **No connector yet**: The skill can still generate local reports, evidence packs, and `notion_payload.json`, but it should stop before mutating Notion. Use the REST fallback only when you explicitly choose token-based publishing.
+
+Notion's recommended remote MCP endpoint is `https://mcp.notion.com/mcp`. The legacy SSE endpoint is `https://mcp.notion.com/sse`; use it only when a client does not support streamable HTTP.
 
 The setup flow will search for an existing `Paper Reading Library` database first. If none is found and the connector can create databases, it will create one and save the database IDs in `.paper-notion/config.json`.
 

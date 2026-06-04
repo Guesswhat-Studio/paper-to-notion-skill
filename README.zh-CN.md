@@ -10,11 +10,42 @@
 
 这个 skill 通过 agent runtime 已授权的 Notion connector 写入 Notion。正常使用 Codex 或 Claude 时，不需要创建 Notion integration token，也不要把密钥粘贴到 prompt 里。
 
+官方参考：
+
+- [Notion MCP overview](https://developers.notion.com/guides/mcp/overview)
+- [Connecting to Notion MCP](https://developers.notion.com/guides/mcp/get-started-with-mcp)
+- [Notion MCP security best practices](https://developers.notion.com/guides/mcp/mcp-security-best-practices)
+- [Codex MCP docs](https://developers.openai.com/codex/mcp)
+- [Claude Notion connector](https://claude.com/connectors/notion)
+- [Claude connectors docs](https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities)
+
 安装或运行 skill 前：
 
-- **Codex**：先在 Codex 里连接 Notion app/connector，并授权它访问论文数据库所在的 workspace 或页面，然后回到当前 thread 运行下面的 setup prompt。
-- **Claude / Claude Code**：通过 Claude connector support 或已配置的 Notion MCP server 连接 Notion。在 Claude Code 里，请确认当前 session 能看到 Notion tools，再让 plugin 创建或更新数据库。
+- **Codex**：把官方 Notion MCP server 加到 `~/.codex/config.toml`，然后运行 OAuth login：
+
+  ```toml
+  [mcp_servers.notion]
+  url = "https://mcp.notion.com/mcp"
+  ```
+
+  ```bash
+  codex mcp login notion
+  ```
+
+  在 Codex TUI 里用 `/mcp` 确认 `notion` 已连接，再运行下面的 setup prompt。
+
+- **Claude Code**：添加官方 Notion MCP server，然后在 Claude Code 里完成认证：
+
+  ```bash
+  claude mcp add --transport http notion https://mcp.notion.com/mcp
+  ```
+
+  然后在 Claude Code 里运行 `/mcp`，跟随 OAuth 流程完成授权。之后再运行下面的 plugin setup 命令。
+
+- **Claude / Claude Desktop**：打开官方 [Claude Notion connector](https://claude.com/connectors/notion)，或使用 Claude 的 Connectors UI：`Settings > Connectors`，添加或选择 Notion，并完成 OAuth。Anthropic 的 connector 文档解释了通用连接流程和权限模型。
 - **还没有 connector**：skill 仍然可以生成本地报告、evidence pack 和 `notion_payload.json`，但应该在写入 Notion 前停止。只有在你明确选择 token fallback 时，才使用 REST fallback。
+
+Notion 推荐的 remote MCP endpoint 是 `https://mcp.notion.com/mcp`。旧版 SSE endpoint 是 `https://mcp.notion.com/sse`；只有在客户端不支持 streamable HTTP 时再使用。
 
 setup 流程会先搜索已有的 `Paper Reading Library` 数据库。如果没找到，并且 connector 支持创建数据库，它会新建一个，并把数据库 ID 保存到 `.paper-notion/config.json`。
 
