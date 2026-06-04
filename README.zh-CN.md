@@ -164,17 +164,6 @@ Claude Cowork 用户可以在 `Customize -> Plugins` 里添加同一个 GitHub �
 - [Create and distribute plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
 - [Plugins reference](https://code.claude.com/docs/en/plugins-reference)
 
-## CI
-
-GitHub Actions 会在 push 和 pull request 时运行轻量验证：
-
-- 编译 Python helper scripts。
-- 用 `tools/validate_repository.py` 检查仓库打包结构和 Claude plugin 副本同步。
-- 校验 Notion schema。
-- 检查 helper CLI 入口。
-
-arXiv network smoke test 只在手动 `workflow_dispatch` 且设置 `run_network_smoke=true` 时运行，避免临时网络或 arXiv 波动阻塞普通 PR。
-
 ## 这个 Skill 能做什么
 
 - 从本地 PDF、arXiv URL、DOI、论文 URL 或论文标题开始阅读。
@@ -193,14 +182,16 @@ arXiv network smoke test 只在手动 `workflow_dispatch` 且设置 `run_network
 ```text
 paper-to-notion-skill/
   .claude-plugin/marketplace.json  # Claude Code marketplace catalog
+  .github/workflows/validate.yml    # GitHub Actions validation workflow
   LICENSE                          # MIT license
   SKILL.md                         # 主 skill 指令
   requirements.txt                 # Python 依赖
   agents/openai.yaml               # agent 配置示例
   config/notion_schema.yaml        # 默认 Notion 数据库 schema
-  plugins/paper-to-notion/         # Claude Code plugin package
+  plugins/paper-to-notion/         # Claude Code plugin package（包含 mirrored skill copy）
   references/                      # 阅读、发布、连接器、环境设置参考
   scripts/                         # 环境、payload、校验、发布辅助脚本
+  tools/                           # 仓库验证和 plugin 同步工具
 ```
 
 ## 环境要求
@@ -210,6 +201,67 @@ paper-to-notion-skill/
 - 通过 runtime connector 获得 Notion 读写权限；只有在使用 REST fallback 时才需要 Notion integration token。
 - 可选：`uv`，用于更快地创建本地环境。
 - 可选：`gh`、`git`、`tesseract`，用于 GitHub 检查、代码仓库核查和扫描版 PDF OCR。
+
+## 维护者说明
+
+上面的安装部分是普通用户路径。下面这些命令主要用于维护、调试和离线环境。
+
+克隆仓库：
+
+```bash
+git clone https://github.com/Guesswhat-Studio/paper-to-notion-skill.git
+cd paper-to-notion-skill
+```
+
+作为 Codex skill 安装时，把整个目录放到 Codex skills 目录下：
+
+```bash
+mkdir -p ~/.codex/skills
+cp -R paper-to-notion-skill ~/.codex/skills/
+```
+
+Windows PowerShell：
+
+```powershell
+New-Item -ItemType Directory -Force $env:USERPROFILE\.codex\skills
+Copy-Item -Recurse . $env:USERPROFILE\.codex\skills\paper-to-notion-skill
+```
+
+从本地 checkout 测试 Claude Code plugin：
+
+```bash
+claude plugin validate .
+claude plugin validate ./plugins/paper-to-notion
+claude plugin marketplace add .
+claude plugin install paper-to-notion@guesswhat-paper-tools
+```
+
+修改 `SKILL.md`、`requirements.txt`、`agents/`、`config/`、`references/` 或 `scripts/` 后，同步 Claude plugin 副本：
+
+```bash
+python tools/sync_plugin.py
+```
+
+提交前建议跑这两个检查：
+
+```bash
+python tools/sync_plugin.py --check
+python tools/validate_repository.py
+```
+
+WorkBuddy 或其他兼容 runtime 可以把这个仓库作为 skill/workflow 目录加入，并让 agent 能读取 `SKILL.md`。
+
+## CI
+
+GitHub Actions 会在 push 和 pull request 时运行轻量验证：
+
+- 编译 Python helper scripts 和 repository tools。
+- 用 `tools/sync_plugin.py --check` 检查 Claude plugin 副本是否保持字节级同步。
+- 用 `tools/validate_repository.py` 检查仓库打包结构和 mirror 约束。
+- 校验 Notion schema。
+- 检查 helper CLI 入口。
+
+arXiv network smoke test 只在手动 `workflow_dispatch` 且设置 `run_network_smoke=true` 时运行，避免临时网络或 arXiv 波动阻塞普通 PR。
 
 ## Agent 会自动设置什么
 
@@ -223,83 +275,7 @@ paper-to-notion-skill/
 - 在工作区保存 `.paper-notion/config.json`。
 - 验证 Notion 数据库可以 fetch 和 query。
 
-## Notion 数据库
-
-默认数据库名是 `Paper Reading Library`。默认字段保持紧凑：
-
-- `Name`
-- `Original Title`
-- `Authors`
-- `Publication Date`
-- `Year`
-- `Created Date`
-- `Venue`
-- `Field`
-- `Type`
-- `Keywords`
-- `Reading Status`
-- `Read Date`
-- `Rating`
-- `DOI`
-- `arXiv`
-- `Code`
-- `Report Language`
-
-长篇贡献分析、技术核心、实验解释、局限性、复现记录和证据链放在 Notion 页面正文里。机器可读 schema 位于：
-
-```text
-config/notion_schema.yaml
-```
-
-## 常用调用方式
-
-设置工作流：
-
-```text
-Use $paper-to-notion-skill to set up my Notion paper reading workflow.
-```
-
-常见输入路由保持简单：
-
-- 本地 PDF：走 PDF 解析和证据截图路径。
-- arXiv 链接或 ID：优先尝试官方 arXiv HTML，包括已验证的 figure 图片 URL；HTML 不可用再回退 PDF。
-- Publisher URL、DOI 或标题：先抓 metadata 和可访问的 full-text HTML；如果页面需要权限，请用户提供 PDF。
-- 已有 report 或 payload：跳过阅读，只做 payload 校验和 Notion 发布。
-
-阅读并发布英文报告：
-
-```text
-Use $paper-to-notion-skill to read this paper in English and save it to my Notion paper database:
-
-https://arxiv.org/abs/1706.03762
-
-Please resolve the paper identity, extract verified metadata, capture important evidence, generate a Notion-ready report with formulas, figures, tables, code and reproducibility notes, create or update the database record, and verify the Notion page after publishing.
-```
-
-阅读并发布中文报告：
-
-```text
-Use $paper-to-notion-skill to read this paper in Chinese and save it to my Notion paper database:
-
-<PDF path, DOI, arXiv URL, paper URL, or title>
-
-Please keep the official English title in Original Title, write the report body in Chinese, preserve formulas in LaTeX, include key figures and tables, and verify the database record after publishing.
-```
-
-发布已有报告：
-
-```text
-Use $paper-to-notion-skill to publish this existing report to my Notion paper database:
-
-Report path: <report.md>
-Metadata path: <metadata.json>
-
-Please build or validate notion_payload.json, deduplicate by DOI/arXiv/title, create or update the Notion page, and verify the result.
-```
-
 ## 手动环境命令
-
-这些命令主要给维护者、调试或离线环境使用。普通用户可以让 Codex 或 Claude 自动处理。
 
 如果本机已经有 Python，在工作目录创建虚拟环境（`.paper-notion/.venv`）并安装依赖：
 
@@ -345,6 +321,38 @@ python scripts/fetch_arxiv_html.py 1706.03762 --output .paper-notion/arxiv-html-
 python scripts/smoke_test_attention.py --output .paper-notion/smoke-test
 ```
 
+smoke test 会下载 "Attention Is All You Need"，用 PyMuPDF 打开 PDF，渲染第一页证据图片，写入示例 metadata 和 report，构建 `notion_payload.json`，并校验 payload。
+
+## Notion 数据库
+
+默认数据库名是 `Paper Reading Library`。默认字段保持紧凑：
+
+- `Name`
+- `Original Title`
+- `Authors`
+- `Publication Date`
+- `Year`
+- `Created Date`
+- `Venue`
+- `Field`
+- `Type`
+- `Keywords`
+- `Reading Status`
+- `Read Date`
+- `Rating`
+- `DOI`
+- `arXiv`
+- `Code`
+- `Report Language`
+
+长篇贡献分析、技术核心、实验解释、局限性、复现记录和证据链放在 Notion 页面正文里。
+
+机器可读 schema 位于：
+
+```text
+config/notion_schema.yaml
+```
+
 生成 schema 摘要：
 
 ```bash
@@ -372,6 +380,54 @@ python scripts/schema_tool.py --command ddl --use-fallbacks
 - **Local evidence pack**：适合不便公开的图片、受版权限制的图，或还没准备发布的报告。使用 `scripts/build_evidence_pack.py` 生成本地 HTML evidence pack，然后在 Notion 页面里说明或链接这个本地包。
 
 如果论文 license 或团队策略不允许公开分发图片，不建议把论文图表上传到公共图床。
+
+## 常用调用方式
+
+设置工作流：
+
+```text
+Use $paper-to-notion-skill to set up my Notion paper reading workflow.
+
+Please detect my runtime, check whether Notion read/write access is available, create or reuse a Notion database named Paper Reading Library, prepare the local Python environment, run the Attention Is All You Need smoke test, save .paper-notion/config.json, and verify the database can be fetched and queried.
+```
+
+常见输入路由保持简单：
+
+- 本地 PDF：走 PDF 解析和证据截图路径。
+- arXiv 链接或 ID：优先尝试官方 arXiv HTML，包括已验证的 figure 图片 URL；HTML 不可用再回退 PDF。
+- Publisher URL、DOI 或标题：先抓 metadata 和可访问的 full-text HTML；如果页面需要权限，请用户提供 PDF。
+- 已有 report 或 payload：跳过阅读，只做 payload 校验和 Notion 发布。
+
+阅读并发布英文报告：
+
+```text
+Use $paper-to-notion-skill to read this paper in English and save it to my Notion paper database:
+
+https://arxiv.org/abs/1706.03762
+
+Please resolve the paper identity, extract verified metadata, capture important evidence, generate a Notion-ready report with formulas, figures, tables, code and reproducibility notes, create or update the database record, and verify the Notion page after publishing.
+```
+
+阅读并发布中文报告：
+
+```text
+Use $paper-to-notion-skill to read this paper in Chinese and save it to my Notion paper database:
+
+<PDF path, DOI, arXiv URL, paper URL, or title>
+
+Please keep the official English title in Original Title, write the report body in Chinese, preserve formulas in LaTeX, include key figures and tables, and verify the database record after publishing.
+```
+
+发布已有报告：
+
+```text
+Use $paper-to-notion-skill to publish this existing report to my Notion paper database:
+
+Report path: <report.md>
+Metadata path: <metadata.json>
+
+Please build or validate notion_payload.json, deduplicate by DOI/arXiv/title, create or update the Notion page, and verify the result.
+```
 
 ## Payload 工作流
 

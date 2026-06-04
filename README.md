@@ -180,14 +180,16 @@ For private repository installs, the user must already have GitHub access to `Gu
 ```text
 paper-to-notion-skill/
   .claude-plugin/marketplace.json  # Claude Code marketplace catalog
+  .github/workflows/validate.yml    # GitHub Actions validation workflow
   LICENSE                          # MIT license
   SKILL.md                         # Main skill instructions
   requirements.txt                 # Python dependencies
   agents/openai.yaml               # Agent configuration example
   config/notion_schema.yaml        # Default Notion database schema
-  plugins/paper-to-notion/         # Claude Code plugin package
+  plugins/paper-to-notion/         # Claude Code plugin package (mirrored skill copy)
   references/                      # Reading, publishing, connector, and setup contracts
   scripts/                         # Environment, payload, validation, and publishing helpers
+  tools/                           # Repository validation and plugin-sync helpers
 ```
 
 ## Requirements
@@ -232,14 +234,28 @@ claude plugin marketplace add .
 claude plugin install paper-to-notion@guesswhat-paper-tools
 ```
 
+After changing `SKILL.md`, `requirements.txt`, `agents/`, `config/`, `references/`, or `scripts/`, sync the Claude plugin copy:
+
+```bash
+python tools/sync_plugin.py
+```
+
+Use this check before committing:
+
+```bash
+python tools/sync_plugin.py --check
+python tools/validate_repository.py
+```
+
 For WorkBuddy or other compatible runtimes, add this repository as a skill/workflow directory and make `SKILL.md` available to the agent.
 
 ## CI
 
 GitHub Actions runs a lightweight validation workflow on push and pull request:
 
-- Compile Python helper scripts.
-- Validate repository packaging and Claude plugin mirror files with `tools/validate_repository.py`.
+- Compile Python helper scripts and repository tools.
+- Check that the Claude plugin copy is byte-for-byte in sync with `tools/sync_plugin.py --check`.
+- Validate repository packaging and mirror invariants with `tools/validate_repository.py`.
 - Validate the Notion schema.
 - Check helper CLI entry points.
 
